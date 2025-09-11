@@ -144,9 +144,9 @@ public class ChessPiece {
     private HashSet<ChessMove> findMoveLines(ChessBoard board, ChessPosition myPosition, HashSet<ChessMove> moves, int xDir, int yDir) {
         int x = myPosition.getRow();
         int y = myPosition.getColumn();
-        while (x < 8 && y < 8 && x > 1 && y > 1 ) {
-            if (xDir == 1) { x++; } else if (xDir == 2) { x--; }
-            if (yDir == 1) { y++; } else if (yDir == 2) { y--; }
+        if (xDir == 1) { x++; } else if (xDir == 2) { x--; }
+        if (yDir == 1) { y++; } else if (yDir == 2) { y--; }
+        while (x <= 8 && y <= 8 && x >= 1 && y >= 1 ) {
             ChessPosition possible_move = new ChessPosition(x,y);
             //System.out.println(possible_move);
             ChessPiece piece_at_move = board.getPiece(possible_move);
@@ -157,6 +157,8 @@ public class ChessPiece {
                 if (piece_at_move.pieceColor != this.pieceColor) { moves.add(new ChessMove(myPosition, possible_move, null)); }
                 break;
             }
+            if (xDir == 1) { x++; } else if (xDir == 2) { x--; }
+            if (yDir == 1) { y++; } else if (yDir == 2) { y--; }
         }
         return moves;
     }
