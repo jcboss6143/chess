@@ -115,11 +115,11 @@ public class ChessPiece {
         if (this.pieceColor == ChessGame.TeamColor.WHITE){ x = 1; }
         else { x = -1; }
         if ((this.pieceColor == ChessGame.TeamColor.WHITE && myPosition.getColumn() == 2) || (this.pieceColor == ChessGame.TeamColor.BLACK && myPosition.getColumn() == 7)){
-            moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow(), myPosition.getColumn() + (x * 2), false);
+            moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow()  + (x * 2), myPosition.getColumn(), false);
         }
-        moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow(), myPosition.getColumn() + x, false);
-        moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() + x, true);
-        moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() + x, true);
+        moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + x, myPosition.getColumn(), false);
+        moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + x, myPosition.getColumn() + 1, true);
+        moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + x, myPosition.getColumn() - 1, true);
         // add pawn moves here
         return moves;
     }
@@ -180,11 +180,13 @@ public class ChessPiece {
         if (x <= 8 && y <= 8 && x >= 1 && y >= 1 ) {
             ChessPosition possible_move = new ChessPosition(x,y);
             ChessPiece piece_at_move = board.getPiece(possible_move);
+            PieceType new_type = null;
+            if (x == 8 || x == 1) { new_type = PieceType.QUEEN; }
             if (piece_at_move != null && piece_at_move.pieceColor != this.pieceColor && diagonal) {
-                moves.add(new ChessMove(myPosition, possible_move, this.type));
+                moves.add(new ChessMove(myPosition, possible_move, new_type));
             }
             else if (piece_at_move == null && !diagonal) {
-                moves.add(new ChessMove(myPosition, possible_move, this.type));
+                moves.add(new ChessMove(myPosition, possible_move, new_type));
             }
         }
         return moves;
