@@ -119,9 +119,7 @@ public class ChessPiece {
         if (((this.pieceColor == ChessGame.TeamColor.WHITE && myPosition.getRow() == 2) || (this.pieceColor == ChessGame.TeamColor.BLACK && myPosition.getRow() == 7))
                 && (board.getPiece(new ChessPosition(myPosition.getRow() + x,myPosition.getColumn())) == null)){
             addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + (x * 2), myPosition.getColumn(), false);
-            addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + (x * 2), myPosition.getColumn() + 1, true);
-            addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + (x * 2), myPosition.getColumn() - 1, true);
-        }
+        } // ^
         addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + x, myPosition.getColumn(), false);
         addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + x, myPosition.getColumn() + 1, true);
         addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + x, myPosition.getColumn() - 1, true);
