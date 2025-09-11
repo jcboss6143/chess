@@ -112,8 +112,8 @@ public class ChessPiece {
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition){
         var moves = new HashSet<ChessMove>();
         int x;
-        if (this.pieceColor == ChessGame.TeamColor.WHITE){ x = -1; }
-        else { x = 1; }
+        if (this.pieceColor == ChessGame.TeamColor.WHITE){ x = 1; }
+        else { x = -1; }
         if ((this.pieceColor == ChessGame.TeamColor.WHITE && myPosition.getColumn() == 2) || (this.pieceColor == ChessGame.TeamColor.BLACK && myPosition.getColumn() == 7)){
             moves = addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow(), myPosition.getColumn() + (x * 2), false);
         }
@@ -151,10 +151,10 @@ public class ChessPiece {
             //System.out.println(possible_move);
             ChessPiece piece_at_move = board.getPiece(possible_move);
             if (piece_at_move == null) {
-                moves.add(new ChessMove(myPosition, possible_move, this.type));
+                moves.add(new ChessMove(myPosition, possible_move, null));
             }
             else {
-                if (piece_at_move.pieceColor != this.pieceColor) { moves.add(new ChessMove(myPosition, possible_move, this.type)); }
+                if (piece_at_move.pieceColor != this.pieceColor) { moves.add(new ChessMove(myPosition, possible_move, null)); }
                 break;
             }
         }
@@ -168,7 +168,7 @@ public class ChessPiece {
             ChessPosition possible_move = new ChessPosition(x,y);
             ChessPiece piece_at_move = board.getPiece(possible_move);
             if (piece_at_move != null && piece_at_move.pieceColor == this.pieceColor ) { return moves; }
-            moves.add(new ChessMove(myPosition, possible_move, this.type));
+            moves.add(new ChessMove(myPosition, possible_move, null));
         }
         return moves;
     }
