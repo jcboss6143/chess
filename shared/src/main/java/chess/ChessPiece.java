@@ -85,27 +85,27 @@ public class ChessPiece {
 
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition){
         var moves = new HashSet<ChessMove>();
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() + 2, myPosition.getColumn() + 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() - 2, myPosition.getColumn() + 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() + 2, myPosition.getColumn() - 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() - 2, myPosition.getColumn() - 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() + 2);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() + 2);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() - 2);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() - 2);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() + 2, myPosition.getColumn() + 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() - 2, myPosition.getColumn() + 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() + 2, myPosition.getColumn() - 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() - 2, myPosition.getColumn() - 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() + 2);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() + 2);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() - 2);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() - 2);
         return moves;
     }
 
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition){
         var moves = new HashSet<ChessMove>();
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() + 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() + 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() - 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() - 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn());
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn());
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow(), myPosition.getColumn() + 1);
-        moves = addMoveIfInBounds(myPosition, moves, myPosition.getRow(), myPosition.getColumn() - 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() + 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() + 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn() - 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn() - 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() + 1, myPosition.getColumn());
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow() - 1, myPosition.getColumn());
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow(), myPosition.getColumn() + 1);
+        moves = addMoveIfValid(board, myPosition, moves, myPosition.getRow(), myPosition.getColumn() - 1);
         return moves;
     }
 
@@ -140,11 +140,12 @@ public class ChessPiece {
             if (yDir == 1) { y++; } else if (yDir == 2) { y--; }
             ChessPosition possible_move = new ChessPosition(x,y);
             //System.out.println(possible_move);
-            if (board.getPiece(possible_move) == null) {
+            ChessPiece piece_at_move = board.getPiece(possible_move);
+            if (piece_at_move == null) {
                 moves.add(new ChessMove(myPosition, possible_move, this.type));
             }
             else {
-                moves.add(new ChessMove(myPosition, possible_move, this.type));
+                if (piece_at_move.pieceColor != this.pieceColor) { moves.add(new ChessMove(myPosition, possible_move, this.type)); }
                 break;
             }
         }
@@ -153,9 +154,10 @@ public class ChessPiece {
 
 
     // =============== Other Move Checks =============== //
-    private HashSet<ChessMove> addMoveIfInBounds(ChessPosition myPosition, HashSet<ChessMove> moves, int x, int y){
+    private HashSet<ChessMove> addMoveIfValid(ChessBoard board, ChessPosition myPosition, HashSet<ChessMove> moves, int x, int y){
         if (x <= 8 && y <= 8 && x >= 1 && y >= 1 ) {
             ChessPosition possible_move = new ChessPosition(x,y);
+            if (board.getPiece(possible_move).pieceColor == this.pieceColor ) { return moves; }
             moves.add(new ChessMove(myPosition, possible_move, this.type));
         }
         return moves;
