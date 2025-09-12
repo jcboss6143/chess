@@ -44,6 +44,7 @@ public class ChessBoard {
      */
     public void resetBoard() {
         board = new ChessPiece[8][8];
+        // Placing all the White pieces. For loop below will place a row of white pawns on the 2nd row
         for (int i = 1; i <= 8; i++) { addPiece(new ChessPosition(2,i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN)); }
         addPiece(new ChessPosition(1,1), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
         addPiece(new ChessPosition(1,2), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
@@ -53,6 +54,7 @@ public class ChessBoard {
         addPiece(new ChessPosition(1,6), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
         addPiece(new ChessPosition(1,7), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
         addPiece(new ChessPosition(1,8), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+        // Placing all the Black pieces For loop below will place a row of white pawns on the 7th row
         for (int i = 1; i <= 8; i++) { addPiece(new ChessPosition(7,i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN)); }
         addPiece(new ChessPosition(8,1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
         addPiece(new ChessPosition(8,2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
@@ -64,20 +66,31 @@ public class ChessBoard {
         addPiece(new ChessPosition(8,8), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
     }
 
+
+
+
+
+    // =============== Overrides  =============== //
+
+
     @Override
     public String toString() {
-        StringBuilder s = new StringBuilder("[");
+        StringBuilder s = new StringBuilder();
         for (int x = 0; x < 8; x++) {
             s.append("{");
             for (int y = 0; y < 8; y++) {
-                if (board[x][y] != null) { s.append(board[x][y].toString()).append("."); }
-                s.append(String.format("%s%s", x, y));
-                if (y != 7) { s.append(":"); }
+                if (board[x][y] != null) {
+                    s.append(board[x][y].toString()).append(".");
+                    s.append(String.format("%s%s:", x, y));
+                }
             }
             s.append("},");
         }
-        return s.toString();
+        return s.toString();    // rows are grouped in {curly brackets}
+                                // Each cell with a piece on it will show the piece type, color, and position which
+                                // Which are separated by periods. Each cell ends with a Colon
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -87,6 +100,7 @@ public class ChessBoard {
         ChessBoard that = (ChessBoard) o;
         return Objects.deepEquals(board, that.board);
     }
+
 
     @Override
     public int hashCode() {
