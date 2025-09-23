@@ -39,6 +39,15 @@ public class ChessBoard {
     }
 
     /**
+     * Removes a chess piece on the chessboard
+     *
+     * @param position The position of the piece to remove
+     */
+    public void removePiece(ChessPosition position) {
+        board[position.getRow()-1][position.getColumn()-1] = null;
+    }
+
+    /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
@@ -87,7 +96,7 @@ public class ChessBoard {
             s.append("},");
         }
         return s.toString();    // rows are grouped in {curly brackets}
-                                // Each cell with a piece on it will show the piece type, color, and position which
+                                // Each cell with a piece on it will show the piece type, color, and position
                                 // Which are separated by periods. Each cell ends with a Colon
     }
 
