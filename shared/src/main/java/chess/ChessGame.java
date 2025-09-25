@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -12,8 +13,6 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor teamTurn;
-    private ChessTeam whiteTeam;
-    private ChessTeam blackTeam;
 
     public ChessGame() {
 
@@ -51,8 +50,21 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece pieceAtPosition = board.getPiece(startPosition);
+        if (pieceAtPosition == null) { return null; }
+        Collection<ChessMove> possibleMoves = pieceAtPosition.pieceMoves(board, startPosition);
+        Collection<ChessMove> allValidMoves = new HashSet<ChessMove>();
+
+        for (ChessMove moveToTest: possibleMoves) {
+            ChessBoard boardCopy = board.clone(); // copy so we have original board after testing the move
+            makeTrustedMove(moveToTest, pieceAtPosition);
+            if (!isInCheck(pieceAtPosition.getTeamColor())) { allValidMoves.add(moveToTest); } // adds move if it doesn't put player in check
+            setBoard(boardCopy); // resets board back to before the move was made
+        }
+        return allValidMoves;
     }
+
+
 
     /**
      * Makes a move in a chess game
@@ -62,8 +74,14 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> potentialMoves = validMoves(move.getStartPosition());
-        if (!potentialMoves.contains(move)) { throw new InvalidMoveException("Please provide a valid move"); }
+        if (potentialMoves == null || !potentialMoves.contains(move)) {
+            throw new InvalidMoveException("Please provide a valid move"); }
         ChessPiece pieceToMove = board.getPiece(move.getStartPosition());
+        makeTrustedMove(move, pieceToMove);
+
+    }
+
+    private void makeTrustedMove(ChessMove move, ChessPiece pieceToMove) {
         board.removePiece(move.getEndPosition());
         board.removePiece(move.getStartPosition());
         board.addPiece(move.getEndPosition(), pieceToMove);
@@ -76,8 +94,45 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessPosition> teamPieces = getPieceLocations(teamColor);
+        ChessPosition kingPosition = findPiece(teamColor, ChessPiece.PieceType.KING);
+        for (ChessPosition currentPiecePosition: teamPieces) {
+            ChessPiece currentPiece = board.getPiece(currentPiecePosition);
+            Collection<ChessMove> possibleMoves = currentPiece.pieceMoves(board, currentPiecePosition);
+            //continuing working
+        }
+        return true;
     }
+
+
+    private Collection<ChessPosition> getPieceLocations (TeamColor teamColor) {
+        HashSet<ChessPosition> teamPieces = new HashSet<>();
+        for (int x = 1; x <= 8; x++) {
+            for (int y = 1; y <= 8; y++) {
+                ChessPosition currentPosition = new ChessPosition(x,y);
+                ChessPiece currentPiece = board.getPiece(currentPosition);
+                if (currentPiece != null && currentPiece.getTeamColor() == teamColor) {
+                    teamPieces.add(currentPosition);
+                }
+            }
+        }
+        return teamPieces;
+    }
+
+
+    private ChessPosition findPiece(TeamColor teamColor, ChessPiece.PieceType pieceType) {
+        for (int x = 1; x <= 8; x++) {
+            for (int y = 1; y <= 8; y++) {
+                ChessPosition currentPosition = new ChessPosition(x,y);
+                ChessPiece currentPiece = board.getPiece(currentPosition);
+                if (currentPiece != null && currentPiece.getTeamColor() == teamColor && currentPiece.getPieceType() == pieceType) {
+                    return currentPosition;
+                }
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Determines if the given team is in checkmate
