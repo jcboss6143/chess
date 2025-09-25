@@ -84,7 +84,10 @@ public class ChessGame {
         if (potentialMoves == null || !potentialMoves.contains(move)) {
             throw new InvalidMoveException("Please provide a valid move"); }
         ChessPiece pieceToMove = board.getPiece(move.getStartPosition());
+        if (pieceToMove.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("That's not your piece silly"); }
         makeTrustedMove(move, pieceToMove);
+        if (teamTurn == TeamColor.WHITE) { setTeamTurn(TeamColor.BLACK); } else { setTeamTurn(TeamColor.WHITE); }
     }
 
 
@@ -102,7 +105,10 @@ public class ChessGame {
     private void makeTrustedMove(ChessMove move, ChessPiece pieceToMove) {
         board.removePiece(move.getEndPosition());
         board.removePiece(move.getStartPosition());
-        board.addPiece(move.getEndPosition(), pieceToMove);
+        if (move.getPromotionPiece() == null) {
+            board.addPiece(move.getEndPosition(), pieceToMove); }
+        else {
+            board.addPiece(move.getEndPosition(), new ChessPiece(pieceToMove.getTeamColor(), move.getPromotionPiece())); }
     }
 
 
