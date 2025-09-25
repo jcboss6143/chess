@@ -80,14 +80,21 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        Collection<ChessMove> potentialMoves = validMoves(move.getStartPosition());
+        Collection<ChessMove> potentialMoves = validMoves(move.getStartPosition()); // gets all possible valid moves
+
+        // verifies that the move provided is a valid move
         if (potentialMoves == null || !potentialMoves.contains(move)) {
             throw new InvalidMoveException("Please provide a valid move"); }
+
+        // verifies the piece they tried to move was their own
         ChessPiece pieceToMove = board.getPiece(move.getStartPosition());
         if (pieceToMove.getTeamColor() != teamTurn) {
             throw new InvalidMoveException("That's not your piece silly"); }
+
+        // moving the piece and switching whose turn it is
         makeTrustedMove(move, pieceToMove);
-        if (teamTurn == TeamColor.WHITE) { setTeamTurn(TeamColor.BLACK); } else { setTeamTurn(TeamColor.WHITE); }
+        if (teamTurn == TeamColor.WHITE) { setTeamTurn(TeamColor.BLACK); }
+        else { setTeamTurn(TeamColor.WHITE); }
     }
 
 
@@ -103,11 +110,10 @@ public class ChessGame {
      * @param pieceToMove the piece we want to move
      */
     private void makeTrustedMove(ChessMove move, ChessPiece pieceToMove) {
-        board.removePiece(move.getEndPosition());
-        board.removePiece(move.getStartPosition());
-        if (move.getPromotionPiece() == null) {
+        board.removePiece(move.getStartPosition()); // removes the piece
+        if (move.getPromotionPiece() == null) { // adds the piece
             board.addPiece(move.getEndPosition(), pieceToMove); }
-        else {
+        else { // adds new promotion piece
             board.addPiece(move.getEndPosition(), new ChessPiece(pieceToMove.getTeamColor(), move.getPromotionPiece())); }
     }
 
@@ -120,7 +126,7 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         // getting our king position
-        ChessPosition kingPosition = findPiece(teamColor, ChessPiece.PieceType.KING);
+        ChessPosition kingPosition = findMatchingPiece(teamColor, ChessPiece.PieceType.KING);
 
         // getting the positions of all enemy pieces
         TeamColor otherTeamColor;
@@ -145,38 +151,35 @@ public class ChessGame {
      */
     private Collection<ChessPosition> getPieceLocations (TeamColor teamColor) {
         HashSet<ChessPosition> teamPieces = new HashSet<>();
+
         for (int x = 1; x <= 8; x++) {
             for (int y = 1; y <= 8; y++) {
                 ChessPosition currentPosition = new ChessPosition(x,y);
                 ChessPiece currentPiece = board.getPiece(currentPosition);
-                if (currentPiece != null && currentPiece.getTeamColor() == teamColor) {
-                    teamPieces.add(currentPosition);
-                }
-            }
+                if (currentPiece != null && currentPiece.getTeamColor() == teamColor) { // adds piece location if color matches
+                    teamPieces.add(currentPosition); } }
         }
         return teamPieces;
     }
 
 
     /**
-     * Returns the position of a desired chess piece.
+     * Returns the position of a desired chess piece. If the piece doesn't exist, it returns null.
      * Notice: Will only return the position of the first piece found.
      * Primarily used for finding a players king.
      *
      * @param teamColor color of the piece we want.
      * @param pieceType the type of piece we want.
      */
-    private ChessPosition findPiece(TeamColor teamColor, ChessPiece.PieceType pieceType) {
+    private ChessPosition findMatchingPiece(TeamColor teamColor, ChessPiece.PieceType pieceType) {
         for (int x = 1; x <= 8; x++) {
             for (int y = 1; y <= 8; y++) {
                 ChessPosition currentPosition = new ChessPosition(x,y);
                 ChessPiece currentPiece = board.getPiece(currentPosition);
                 if (currentPiece != null && currentPiece.getTeamColor() == teamColor && currentPiece.getPieceType() == pieceType) {
-                    return currentPosition;
-                }
-            }
+                    return currentPosition; } }     // piece has been found. returns the position
         }
-        return null;
+        return null;    // returns nothing if the piece wasn't found
     }
 
 
@@ -190,6 +193,7 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
+
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves while not in check.
@@ -200,6 +204,7 @@ public class ChessGame {
     public boolean isInStalemate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
     }
+
 
     /**
      * Sets this game's chessboard with a given board
