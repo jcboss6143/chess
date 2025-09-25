@@ -81,11 +81,24 @@ public class ChessGame {
 
     }
 
+
+    /**
+     * Makes a move that is known to be possible (this move may not be a valid move)
+     * =========================================================================================================
+     *  NOTICE: this should only be called if you got the 'move' parameter from the hashset returned by calling
+     *  piecemoves on your 'pieceToMove' parameter!
+     * =========================================================================================================
+     *
+     * @param move chess move to perform. This move should have
+     *             originated from the hashset described above
+     * @param pieceToMove the piece we want to move
+     */
     private void makeTrustedMove(ChessMove move, ChessPiece pieceToMove) {
         board.removePiece(move.getEndPosition());
         board.removePiece(move.getStartPosition());
         board.addPiece(move.getEndPosition(), pieceToMove);
     }
+
 
     /**
      * Determines if the given team is in check
@@ -94,17 +107,30 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        Collection<ChessPosition> teamPieces = getPieceLocations(teamColor);
+        // getting our king position
         ChessPosition kingPosition = findPiece(teamColor, ChessPiece.PieceType.KING);
-        for (ChessPosition currentPiecePosition: teamPieces) {
-            ChessPiece currentPiece = board.getPiece(currentPiecePosition);
-            Collection<ChessMove> possibleMoves = currentPiece.pieceMoves(board, currentPiecePosition);
-            //continuing working
+
+        // getting the positions of all enemy pieces
+        TeamColor otherTeamColor;
+        if (teamColor == TeamColor.WHITE) { otherTeamColor = TeamColor.BLACK; } else { otherTeamColor = TeamColor.WHITE; }
+        Collection<ChessPosition> enemyTeamPieces = getPieceLocations(otherTeamColor);
+
+        // loops through each of the enemies pieces and checks if it has a move that can take the king
+        for (ChessPosition currentEnemyPosition : enemyTeamPieces) {
+            ChessPiece currentPiece = board.getPiece(currentEnemyPosition);
+            Collection<ChessMove> possibleEnemyMoves = currentPiece.pieceMoves(board, currentEnemyPosition);
+            for (ChessMove possibleEnemyMove: possibleEnemyMoves) {
+                if (possibleEnemyMove.getEndPosition() == kingPosition){ return true; } } // player is in check
         }
-        return true;
+        return false;
     }
 
 
+    /**
+     * Returns a hashset of all black or white pieces currently on the board
+     *
+     * @param teamColor finds all locations of pieces that are of this color.
+     */
     private Collection<ChessPosition> getPieceLocations (TeamColor teamColor) {
         HashSet<ChessPosition> teamPieces = new HashSet<>();
         for (int x = 1; x <= 8; x++) {
@@ -120,6 +146,14 @@ public class ChessGame {
     }
 
 
+    /**
+     * Returns the position of a desired chess piece.
+     * Notice: Will only return the position of the first piece found.
+     * Primarily used for finding a players king.
+     *
+     * @param teamColor color of the piece we want.
+     * @param pieceType the type of piece we want.
+     */
     private ChessPosition findPiece(TeamColor teamColor, ChessPiece.PieceType pieceType) {
         for (int x = 1; x <= 8; x++) {
             for (int y = 1; y <= 8; y++) {
