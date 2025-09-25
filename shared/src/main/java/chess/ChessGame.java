@@ -50,18 +50,25 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        // finding all possible moves
         ChessPiece pieceAtPosition = board.getPiece(startPosition);
         if (pieceAtPosition == null) { return null; }
         Collection<ChessMove> possibleMoves = pieceAtPosition.pieceMoves(board, startPosition);
-        Collection<ChessMove> allValidMoves = new HashSet<ChessMove>();
+        Collection<ChessMove> nonValidMoves = new HashSet<>();
 
+        // goes through all possible moves and adds them to nonValidMoves if it puts the king in check
         for (ChessMove moveToTest: possibleMoves) {
             ChessBoard boardCopy = board.clone(); // copy so we have original board after testing the move
             makeTrustedMove(moveToTest, pieceAtPosition);
-            if (!isInCheck(pieceAtPosition.getTeamColor())) { allValidMoves.add(moveToTest); } // adds move if it doesn't put player in check
+            if (isInCheck(pieceAtPosition.getTeamColor())) {
+                nonValidMoves.add(moveToTest); } // adds move if it puts player in check
             setBoard(boardCopy); // resets board back to before the move was made
         }
-        return allValidMoves;
+
+        // removing all invalid moves from possibleMoves
+        for (ChessMove invalidMove: nonValidMoves) {
+            possibleMoves.remove(invalidMove); }
+        return possibleMoves;
     }
 
 
@@ -78,7 +85,6 @@ public class ChessGame {
             throw new InvalidMoveException("Please provide a valid move"); }
         ChessPiece pieceToMove = board.getPiece(move.getStartPosition());
         makeTrustedMove(move, pieceToMove);
-
     }
 
 
@@ -86,7 +92,7 @@ public class ChessGame {
      * Makes a move that is known to be possible (this move may not be a valid move)
      * =========================================================================================================
      *  NOTICE: this should only be called if you got the 'move' parameter from the hashset returned by calling
-     *  piecemoves on your 'pieceToMove' parameter!
+     *  piecemoves() on your 'pieceToMove' parameter!
      * =========================================================================================================
      *
      * @param move chess move to perform. This move should have
@@ -120,7 +126,7 @@ public class ChessGame {
             ChessPiece currentPiece = board.getPiece(currentEnemyPosition);
             Collection<ChessMove> possibleEnemyMoves = currentPiece.pieceMoves(board, currentEnemyPosition);
             for (ChessMove possibleEnemyMove: possibleEnemyMoves) {
-                if (possibleEnemyMove.getEndPosition() == kingPosition){ return true; } } // player is in check
+                if (possibleEnemyMove.getEndPosition().equals(kingPosition)){ return true; } } // player is in check
         }
         return false;
     }
