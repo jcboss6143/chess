@@ -149,7 +149,7 @@ public class ChessGame {
      *
      * @param teamColor finds all locations of pieces that are of this color.
      */
-    private Collection<ChessPosition> getPieceLocations (TeamColor teamColor) {
+    private Collection<ChessPosition> getPieceLocations(TeamColor teamColor) {
         HashSet<ChessPosition> teamPieces = new HashSet<>();
 
         for (int x = 1; x <= 8; x++) {
@@ -190,8 +190,30 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor) & !isMovePossible(teamColor)) {
+            return true;
+        }
+        return false;
     }
+
+
+    /**
+     * Determines if there are moves that can be made
+     *
+     * @param teamColor which team to check for checkmate
+     * @return True if there is a valid move a piece can make for that team
+     */
+    private boolean isMovePossible(TeamColor teamColor) {
+        Collection<ChessPosition> teamPieces = getPieceLocations(teamColor);
+        for (ChessPosition piecePosition:teamPieces){
+            Collection<ChessMove> possibleMoves = validMoves(piecePosition);
+            if (!possibleMoves.isEmpty()){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 
     /**
@@ -202,7 +224,10 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor) & !isMovePossible(teamColor)) {
+            return true;
+        }
+        return false;
     }
 
 
