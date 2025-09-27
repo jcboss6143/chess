@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -17,6 +18,11 @@ public class ChessGame {
     public ChessGame() {
         board.resetBoard();
     }
+
+
+
+    // =============== Turns =============== //
+
 
     /**
      * @return Which team's turn it is
@@ -41,6 +47,11 @@ public class ChessGame {
         WHITE,
         BLACK
     }
+
+
+
+    // =============== Moves =============== //
+
 
     /**
      * Gets a valid moves for a piece at the given location
@@ -119,6 +130,70 @@ public class ChessGame {
 
 
     /**
+     * Determines if there are moves that can be made
+     *
+     * @param teamColor which team to check for possible moves
+     * @return True if there is a valid move a piece can make for that team
+     */
+    private boolean isMovePossible(TeamColor teamColor) {
+        Collection<ChessPosition> teamPieces = getPieceLocations(teamColor);
+        for (ChessPosition piecePosition:teamPieces){   // loops through all pieces and checks if they return any vaid moves
+            Collection<ChessMove> possibleMoves = validMoves(piecePosition);
+            if (!possibleMoves.isEmpty()){ return true; }
+        }
+        return false;
+    }
+
+
+
+    // =============== Finding Pieces on Board =============== //
+
+
+    /**
+     * Returns a hashset of all black or white pieces currently on the board
+     *
+     * @param teamColor finds all locations of pieces that are of this color.
+     */
+    private Collection<ChessPosition> getPieceLocations(TeamColor teamColor) {
+        HashSet<ChessPosition> teamPieces = new HashSet<>();
+        for (int x = 1; x <= 8; x++) {
+            for (int y = 1; y <= 8; y++) {  // looping through the board
+                ChessPosition currentPosition = new ChessPosition(x,y);
+                ChessPiece currentPiece = board.getPiece(currentPosition);
+                if (currentPiece != null && currentPiece.getTeamColor() == teamColor) { // adds piece location if color matches
+                    teamPieces.add(currentPosition); } }
+        }
+        return teamPieces;
+    }
+
+
+    /**
+     * Returns the position of a desired chess piece. If the piece doesn't exist, it returns null.
+     * Notice: Will only return the position of the first piece found.
+     * Primarily used for finding a players king.
+     *
+     * @param teamColor color of the piece we want.
+     * @param pieceType the type of piece we want.
+     */
+    private ChessPosition findMatchingPiece(TeamColor teamColor, ChessPiece.PieceType pieceType) {
+        for (int x = 1; x <= 8; x++) {
+            for (int y = 1; y <= 8; y++) {  // looping through the board
+                ChessPosition currentPosition = new ChessPosition(x,y);
+                ChessPiece currentPiece = board.getPiece(currentPosition);
+                if (currentPiece != null && currentPiece.getTeamColor() == teamColor && currentPiece.getPieceType() == pieceType) {
+                    return currentPosition; } }     // if piece has been found, returns the position
+        }
+        return null;    // returns nothing if the piece wasn't found
+    }
+
+
+
+
+
+    // =============== Check, Checkmate, and Stalemate =============== //
+
+
+    /**
      * Determines if the given team is in check
      *
      * @param teamColor which team to check for check
@@ -145,45 +220,6 @@ public class ChessGame {
 
 
     /**
-     * Returns a hashset of all black or white pieces currently on the board
-     *
-     * @param teamColor finds all locations of pieces that are of this color.
-     */
-    private Collection<ChessPosition> getPieceLocations(TeamColor teamColor) {
-        HashSet<ChessPosition> teamPieces = new HashSet<>();
-
-        for (int x = 1; x <= 8; x++) {
-            for (int y = 1; y <= 8; y++) {
-                ChessPosition currentPosition = new ChessPosition(x,y);
-                ChessPiece currentPiece = board.getPiece(currentPosition);
-                if (currentPiece != null && currentPiece.getTeamColor() == teamColor) { // adds piece location if color matches
-                    teamPieces.add(currentPosition); } }
-        }
-        return teamPieces;
-    }
-
-
-    /**
-     * Returns the position of a desired chess piece. If the piece doesn't exist, it returns null.
-     * Notice: Will only return the position of the first piece found.
-     * Primarily used for finding a players king.
-     *
-     * @param teamColor color of the piece we want.
-     * @param pieceType the type of piece we want.
-     */
-    private ChessPosition findMatchingPiece(TeamColor teamColor, ChessPiece.PieceType pieceType) {
-        for (int x = 1; x <= 8; x++) {
-            for (int y = 1; y <= 8; y++) {
-                ChessPosition currentPosition = new ChessPosition(x,y);
-                ChessPiece currentPiece = board.getPiece(currentPosition);
-                if (currentPiece != null && currentPiece.getTeamColor() == teamColor && currentPiece.getPieceType() == pieceType) {
-                    return currentPosition; } }     // piece has been found. returns the position
-        }
-        return null;    // returns nothing if the piece wasn't found
-    }
-
-
-    /**
      * Determines if the given team is in checkmate
      *
      * @param teamColor which team to check for checkmate
@@ -192,25 +228,6 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         return isInCheck(teamColor) & !isMovePossible(teamColor);
     }
-
-
-    /**
-     * Determines if there are moves that can be made
-     *
-     * @param teamColor which team to check for possible moves
-     * @return True if there is a valid move a piece can make for that team
-     */
-    private boolean isMovePossible(TeamColor teamColor) {
-        Collection<ChessPosition> teamPieces = getPieceLocations(teamColor);
-        for (ChessPosition piecePosition:teamPieces){
-            Collection<ChessMove> possibleMoves = validMoves(piecePosition);
-            if (!possibleMoves.isEmpty()){
-                return true;
-            }
-        }
-        return false;
-    }
-
 
 
     /**
@@ -223,6 +240,12 @@ public class ChessGame {
     public boolean isInStalemate(TeamColor teamColor) {
         return !isInCheck(teamColor) & !isMovePossible(teamColor);
     }
+
+
+
+
+
+    // =============== Set and Get Board =============== //
 
 
     /**
@@ -243,5 +266,30 @@ public class ChessGame {
         return board;
     }
 
+
+
+
+
+    // =============== Overrides  =============== //
+
+
+    @Override
+    public String toString() {
+        return "{" + "Turn=" + teamTurn + ", Board=" + board + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, teamTurn);
+    }
 
 }
