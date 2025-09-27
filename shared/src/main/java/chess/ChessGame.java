@@ -11,11 +11,11 @@ import java.util.HashSet;
  */
 public class ChessGame {
 
-    private ChessBoard board;
-    private TeamColor teamTurn;
+    private ChessBoard board = new ChessBoard();
+    private TeamColor teamTurn = TeamColor.WHITE;
 
     public ChessGame() {
-
+        board.resetBoard();
     }
 
     /**
@@ -190,17 +190,14 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (isInCheck(teamColor) & !isMovePossible(teamColor)) {
-            return true;
-        }
-        return false;
+        return isInCheck(teamColor) & !isMovePossible(teamColor);
     }
 
 
     /**
      * Determines if there are moves that can be made
      *
-     * @param teamColor which team to check for checkmate
+     * @param teamColor which team to check for possible moves
      * @return True if there is a valid move a piece can make for that team
      */
     private boolean isMovePossible(TeamColor teamColor) {
@@ -224,10 +221,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        if (!isInCheck(teamColor) & !isMovePossible(teamColor)) {
-            return true;
-        }
-        return false;
+        return !isInCheck(teamColor) & !isMovePossible(teamColor);
     }
 
 
@@ -248,4 +242,6 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+
+
 }
