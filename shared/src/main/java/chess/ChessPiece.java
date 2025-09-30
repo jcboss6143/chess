@@ -124,7 +124,8 @@ public class ChessPiece {
         int x; // x determines the pawns direction (up for White and down for black)
         if (this.pieceColor == ChessGame.TeamColor.WHITE){ x = 1; } else { x = -1; }
         // the if statement below deals with the special rule pawns have when they're moved for the first time
-        if (((this.pieceColor == ChessGame.TeamColor.WHITE && myPosition.getRow() == 2) || (this.pieceColor == ChessGame.TeamColor.BLACK && myPosition.getRow() == 7))
+        if (((this.pieceColor == ChessGame.TeamColor.WHITE && myPosition.getRow() == 2) ||
+                (this.pieceColor == ChessGame.TeamColor.BLACK && myPosition.getRow() == 7))
                 && (board.getPiece(new ChessPosition(myPosition.getRow() + x,myPosition.getColumn())) == null)){
             addPawnMoveIfValid(board, myPosition, moves, myPosition.getRow() + (x * 2), myPosition.getColumn(), false); }
         // Default Possible moves for a Pawn
@@ -170,12 +171,12 @@ public class ChessPiece {
         if (xDir == 1) { x++; } else if (xDir == 2) { x--; }
         if (yDir == 1) { y++; } else if (yDir == 2) { y--; }
         while (x <= 8 && y <= 8 && x >= 1 && y >= 1 ) {
-            ChessPosition possible_move = new ChessPosition(x,y);
-            ChessPiece piece_at_move = board.getPiece(possible_move);
-            if (piece_at_move == null) {
-                moves.add(new ChessMove(myPosition, possible_move, null)); } // adds move if position is empty
+            ChessPosition possibleMove = new ChessPosition(x,y);
+            ChessPiece pieceAtMove = board.getPiece(possibleMove);
+            if (pieceAtMove == null) {
+                moves.add(new ChessMove(myPosition, possibleMove, null)); } // adds move if position is empty
             else {
-                if (piece_at_move.pieceColor != this.pieceColor) { moves.add(new ChessMove(myPosition, possible_move, null)); }
+                if (pieceAtMove.pieceColor != this.pieceColor) { moves.add(new ChessMove(myPosition, possibleMove, null)); }
                 break; }
             if (xDir == 1) { x++; } else if (xDir == 2) { x--; } // x-axis shift
             if (yDir == 1) { y++; } else if (yDir == 2) { y--; } // y-axis shift
@@ -192,21 +193,21 @@ public class ChessPiece {
     // Function is given a possible move location (x and y) and adds it if the move is in-bounds and doesn't contain a piece of the same color
     private void addMoveIfValid(ChessBoard board, ChessPosition myPosition, HashSet<ChessMove> moves, int x, int y){
         if (x <= 8 && y <= 8 && x >= 1 && y >= 1 ) {
-            ChessPosition possible_move = new ChessPosition(x,y);
-            ChessPiece piece_at_move = board.getPiece(possible_move);
-            if (piece_at_move == null || piece_at_move.pieceColor != this.pieceColor) {
-                moves.add(new ChessMove(myPosition, possible_move, null)); } }
+            ChessPosition possibleMove = new ChessPosition(x,y);
+            ChessPiece pieceAtMove = board.getPiece(possibleMove);
+            if (pieceAtMove == null || pieceAtMove.pieceColor != this.pieceColor) {
+                moves.add(new ChessMove(myPosition, possibleMove, null)); } }
     }
 
     // modified version of AddMoveIfValid, but it has additional checks specifically for pawns
     // these checks include diagonal captures and piece promotions
     private void addPawnMoveIfValid(ChessBoard board, ChessPosition myPosition, HashSet<ChessMove> moves, int x, int y, boolean diagonal){
         if (x <= 8 && y <= 8 && x >= 1 && y >= 1 ) {
-            ChessPosition possible_move = new ChessPosition(x,y);
-            ChessPiece piece_at_move = board.getPiece(possible_move);
-            if ((piece_at_move != null && piece_at_move.pieceColor != this.pieceColor && diagonal) || (piece_at_move == null && !diagonal)) {
-                if (x == 8 || x == 1) { promotePawn(myPosition, possible_move, moves); }
-                else { moves.add(new ChessMove(myPosition, possible_move, null)); } } }
+            ChessPosition possibleMove = new ChessPosition(x,y);
+            ChessPiece pieceAtMove = board.getPiece(possibleMove);
+            if ((pieceAtMove != null && pieceAtMove.pieceColor != this.pieceColor && diagonal) || (pieceAtMove == null && !diagonal)) {
+                if (x == 8 || x == 1) { promotePawn(myPosition, possibleMove, moves); }
+                else { moves.add(new ChessMove(myPosition, possibleMove, null)); } } }
     }
 
 
