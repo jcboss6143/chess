@@ -126,7 +126,6 @@ public class ChessBoard implements Cloneable{
                     clone.board[x][y] = this.board[x][y];
                 }
             }
-            // TODO: copy mutable state here, so the clone can't change the internals of the original
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
