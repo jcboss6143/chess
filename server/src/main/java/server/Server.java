@@ -23,9 +23,28 @@ public class Server {
         javalin.get("/game", this::listGames);
         javalin.post("/game", this::createGame);
         javalin.put("/games", this::joinGame);
-        // Register your endpoints and exception handlers here.
 
+        javalin.exception(Exception.class, this::serverError)
+                .error(404, this::notFoundError)
+                .start(8080);
+        // Register your endpoints and exception handlers here.
     }
+
+    private void exceptionHandler(Exception e, Context context, int statusNumber) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
+        context.status(statusNumber);
+        context.json(body);
+    }
+
+    private void serverError(Exception e, Context context) {
+        exceptionHandler(e, context, 500);
+    }
+
+    private void notFoundError(Context context) {
+        String msg = String.format("[%s] %s not found", context.method(), context.path());
+        exceptionHandler(new Exception(msg), context, 404);
+    }
+
 
 
     private void clearApplication(Context ctx) throws ServiceException {
@@ -43,9 +62,7 @@ public class Server {
             ctx.json(json);
         } catch (ServiceException e) {
             // TODO: Finish implementing all errors
-            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
-            ctx.status(500);
-            ctx.json(body);
+            exceptionHandler(new Exception("unauthorized"), ctx, 401);
         }
     }
 
