@@ -39,15 +39,6 @@ public class GameData {
         return game;
     }
 
-    public String toJson(){
-        return "{\n" +
-                "  \"gameID\": \"" + this.gameID + "\",\n" +
-                "  \"whiteUsername\": \"" + this.whiteUsername + "\",\n" +
-                "  \"blackUsername\": \"" + this.blackUsername + "\"\n" +
-                "  \"gameName\": \"" + this.gameName + "\"\n" +
-                "  \"game\": \"" + this.game.toJson() + "\"\n" +
-                "}";
-    }
 
     @Override
     public String toString() {

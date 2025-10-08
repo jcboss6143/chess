@@ -267,28 +267,6 @@ public class ChessGame {
     }
 
 
-    // =============== Game in Json  =============== //
-
-
-
-    public String toJson(){
-        String jsonData = "{\n" +
-                "  \"teamTurn\": \"" + this.teamTurn + "\"\n" +
-                "  \"board\": [\n" +
-                "    [";
-        Collection<ChessPosition> whiteTeamPieces = getPieceLocations(TeamColor.WHITE);
-        Collection<ChessPosition> blackTeamPieces = getPieceLocations(TeamColor.WHITE);
-        for (ChessPosition piece: whiteTeamPieces) {
-            ChessPiece currentPiece = board.getPiece(piece);
-        }
-        for (ChessPosition piece: blackTeamPieces) {
-            ChessPiece currentPiece = board.getPiece(piece);
-        }
-        return jsonData + "] \n }";
-    }
-
-
-
 
 
 

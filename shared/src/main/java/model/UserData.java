@@ -25,14 +25,6 @@ public class UserData {
         return email;
     }
 
-    public String toJson() {
-        return "{\n" +
-                "  \"username\": \"" + this.username + "\",\n" +
-                "  \"password\": \"" + this.password + "\",\n" +
-                "  \"email\": \"" + this.email + "\"\n" +
-                "}";
-    }
-
     @Override
     public String toString() {
         return "UserData{" +

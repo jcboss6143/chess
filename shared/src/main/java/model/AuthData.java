@@ -19,13 +19,6 @@ public class AuthData {
         return username;
     }
 
-    public String toJson() {
-        return "{\n" +
-                "  \"authToken\": \"" + this.authToken + "\",\n" +
-                "  \"username\": \"" + this.username + "\",\n" +
-                "}";
-    }
-
     @Override
     public String toString() {
         return "AuthData{" +
