@@ -1,6 +1,5 @@
 package dataaccess;
 
-import chess.InvalidMoveException;
 import model.AuthData;
 
 public class AuthDataAccess {
