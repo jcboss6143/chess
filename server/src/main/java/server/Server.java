@@ -1,7 +1,14 @@
 package server;
 
+import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
+import model.AuthData;
+import model.UserData;
+import service.ServiceException;
+import service.UserService;
+import java.util.Map;
+
 
 public class Server {
 
@@ -21,12 +28,25 @@ public class Server {
     }
 
 
-    private void clearApplication(Context ctx) {
-
+    private void clearApplication(Context ctx) throws ServiceException {
+        service.DatabaseService.deleteAllData();
+        ctx.status(200);
     }
 
     private void register(Context ctx) {
-
+        try{
+            // register user
+            UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
+            AuthData authData = UserService.register(userData);
+            // Convert authData to json and send to client
+            String json = new Gson().toJson(authData);
+            ctx.json(json);
+        } catch (ServiceException e) {
+            // TODO: Finish implementing all errors
+            var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
+            ctx.status(500);
+            ctx.json(body);
+        }
     }
 
     private void login(Context ctx) {

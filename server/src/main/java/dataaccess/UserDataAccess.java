@@ -3,18 +3,16 @@ package dataaccess;
 import model.UserData;
 
 public class UserDataAccess {
-    public UserDataAccess() {
-    }
 
-    public void clear() throws DataAccessException{
+    public static void clear() throws DataAccessException{
         throw new DataAccessException("implement");
     }
 
-    public void createUser() throws DataAccessException{
+    public static void addUser(UserData userData) throws DataAccessException{
         throw new DataAccessException("implement");
     }
 
-    public UserData getUser() throws DataAccessException{
+    public static UserData getUser(String username) throws DataAccessException{
         throw new DataAccessException("implement");
     }
 }

@@ -7,13 +7,13 @@ import service.model.ListGamesResult;
 
 
 public class GameService {
-    public ListGamesResult listGames(String authToken) throws ServiceException {
+    public static ListGamesResult listGames(String authToken) throws ServiceException {
         throw new ServiceException("implement");
     }
-    public CreateGameResult createGame(CreateGameRequest makeGameRequest) throws ServiceException {
+    public static CreateGameResult createGame(CreateGameRequest makeGameRequest) throws ServiceException {
         throw new ServiceException("implement");
     }
-    public void joinGame(JoinGameRequest joinGameRequest) throws ServiceException {
+    public static void joinGame(JoinGameRequest joinGameRequest) throws ServiceException {
         throw new ServiceException("implement");
     }
 }

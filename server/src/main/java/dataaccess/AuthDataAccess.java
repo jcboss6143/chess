@@ -1,24 +1,23 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 
 public class AuthDataAccess {
-    public AuthDataAccess() {
-    }
 
-    public void clear() throws DataAccessException{
+    public static void clear() throws DataAccessException{
         throw new DataAccessException("implement");
     }
 
-    public void createAuth() throws DataAccessException{
+    public static void addAuth(AuthData authData) throws DataAccessException{
         throw new DataAccessException("implement");
     }
 
-    public AuthData getAuth() throws DataAccessException{
+    public static AuthData getAuth(AuthData authData) throws DataAccessException{
         throw new DataAccessException("implement");
     }
 
-    public void deleteAuth() throws DataAccessException{
+    public static void deleteAuth(AuthData authData) throws DataAccessException{
         throw new DataAccessException("implement");
     }
 }

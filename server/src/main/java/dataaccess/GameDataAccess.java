@@ -6,7 +6,7 @@ public class GameDataAccess {
     public GameDataAccess() {
     }
 
-    public void clear() throws DataAccessException{
+    public static void clear() throws DataAccessException{
         throw new DataAccessException("implement");
     }
 
