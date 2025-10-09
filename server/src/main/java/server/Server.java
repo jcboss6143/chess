@@ -28,8 +28,6 @@ public class Server {
 
         server.exception(Exception.class, this::exceptionHandler);
         server.error(404, this::notFoundError);
-        server.start(8080);
-        // Register your endpoints and exception handlers here.
     }
 
     private void formatError(String errorMessage, Context context, int statusNumber) {
