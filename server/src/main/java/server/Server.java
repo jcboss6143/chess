@@ -55,8 +55,8 @@ public class Server {
 
 
 
-    private void clearApplication(Context ctx) throws ServiceException, DataAccessException {
-//        service.DatabaseService.deleteAllData();
+    private void clearApplication(Context ctx) throws DataAccessException {
+        service.DatabaseService.deleteAllData();
         ctx.result("{}");
     }
 

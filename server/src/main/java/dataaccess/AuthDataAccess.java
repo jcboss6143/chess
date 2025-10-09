@@ -12,7 +12,7 @@ public class AuthDataAccess {
         authInfo.clear();
     }
 
-    public static void addAuth(AuthData authData) throws DataAccessException{
+    public static void addAuth(AuthData authData) throws DataAccessException {
         authInfo.put(authData.authToken(), authData);
     }
 
