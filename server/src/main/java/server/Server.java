@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
@@ -8,92 +9,98 @@ import model.UserData;
 import service.ServiceException;
 import service.UserService;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class Server {
 
-    private final Javalin javalin;
+    private final Javalin server;
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        javalin.delete("/db", this::clearApplication);
-        javalin.post("/user", this::register);
-        javalin.post("/session", this::login);
-        javalin.delete("/session", this::logout);
-        javalin.get("/game", this::listGames);
-        javalin.post("/game", this::createGame);
-        javalin.put("/games", this::joinGame);
+        server = Javalin.create(config -> config.staticFiles.add("web"));
+        server.delete("db", this::clearApplication);
+        server.post("user", this::register);
+        server.post("session", this::login);
+        server.delete("session", this::logout);
+        server.get("game", this::listGames);
+        server.post("game", this::createGame);
+        server.put("games", this::joinGame);
 
-        javalin.exception(Exception.class, this::serverError)
-                .error(404, this::notFoundError)
-                .start(8080);
+        server.exception(Exception.class, this::exceptionHandler);
+        server.error(404, this::notFoundError);
+        server.start(8080);
         // Register your endpoints and exception handlers here.
     }
 
-    private void exceptionHandler(Exception e, Context context, int statusNumber) {
+    private void formatError(Exception e, Context context, int statusNumber) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         context.status(statusNumber);
         context.json(body);
     }
 
-    private void serverError(Exception e, Context context) {
-        exceptionHandler(e, context, 500);
+    private void exceptionHandler(Exception e, Context context) {
+        String errorMessage = e.getMessage();
+        if (Objects.equals(errorMessage, "400")){
+            formatError(new Exception("bad request"), context, 400);
+        } else if (Objects.equals(errorMessage, "401")) {
+            formatError(new Exception("unauthorized"), context, 401);
+        } else if (Objects.equals(errorMessage, "403")) {
+            formatError(new Exception("already taken"), context, 403);
+        } else {
+            formatError(e, context, 500);
+        }
     }
 
     private void notFoundError(Context context) {
         String msg = String.format("[%s] %s not found", context.method(), context.path());
-        exceptionHandler(new Exception(msg), context, 404);
+        formatError(new Exception(msg), context, 404);
     }
 
 
 
-    private void clearApplication(Context ctx) throws ServiceException {
-        service.DatabaseService.deleteAllData();
-        ctx.status(200);
+    private void clearApplication(Context ctx) throws ServiceException, DataAccessException {
+//        service.DatabaseService.deleteAllData();
+        ctx.result("{}");
     }
 
-    private void register(Context ctx) {
-        try{
-            // register user
-            UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
-            AuthData authData = UserService.register(userData);
-            // Convert authData to json and send to client
-            String json = new Gson().toJson(authData);
-            ctx.json(json);
-        } catch (ServiceException e) {
-            // TODO: Finish implementing all errors
-            exceptionHandler(new Exception("unauthorized"), ctx, 401);
-        }
+
+    private void register(Context ctx) throws ServiceException, DataAccessException  {
+        // register user
+        UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
+        AuthData authData = UserService.register(userData);
+        // Convert authData to json and send to client
+        String json = new Gson().toJson(authData);
+        ctx.result(json);
     }
 
-    private void login(Context ctx) {
+    private void login(Context ctx) throws ServiceException, DataAccessException  {
 
     }
 
-    private void logout(Context ctx) {
+    private void logout(Context ctx) throws ServiceException, DataAccessException  {
 
     }
 
-    private void listGames(Context ctx) {
+    private void listGames(Context ctx) throws ServiceException, DataAccessException  {
 
     }
 
-    private void createGame(Context ctx) {
+    private void createGame(Context ctx) throws ServiceException, DataAccessException  {
 
     }
 
-    private void joinGame(Context ctx) {
+    private void joinGame(Context ctx) throws ServiceException, DataAccessException  {
 
     }
 
 
 
     public int run(int desiredPort) {
-        javalin.start(desiredPort);
-        return javalin.port();
+        server.start(desiredPort);
+        return server.port();
     }
 
     public void stop() {
-        javalin.stop();
+        server.stop();
     }
 }
