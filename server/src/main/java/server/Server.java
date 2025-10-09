@@ -32,28 +32,25 @@ public class Server {
         // Register your endpoints and exception handlers here.
     }
 
-    private void formatError(Exception e, Context context, int statusNumber) {
-        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
+    private void formatError(String errorMessage, Context context, int statusNumber) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", errorMessage)));
         context.status(statusNumber);
         context.json(body);
     }
 
     private void exceptionHandler(Exception e, Context context) {
         String errorMessage = e.getMessage();
-        if (Objects.equals(errorMessage, "400")){
-            formatError(new Exception("bad request"), context, 400);
-        } else if (Objects.equals(errorMessage, "401")) {
-            formatError(new Exception("unauthorized"), context, 401);
-        } else if (Objects.equals(errorMessage, "403")) {
-            formatError(new Exception("already taken"), context, 403);
-        } else {
-            formatError(e, context, 500);
+        switch (errorMessage) {
+            case "400" -> formatError("bad request", context, 400);
+            case "401" -> formatError("unauthorized", context, 401);
+            case "403" -> formatError("already taken", context, 403);
+            case null, default -> formatError(errorMessage, context, 500);
         }
     }
 
     private void notFoundError(Context context) {
         String msg = String.format("[%s] %s not found", context.method(), context.path());
-        formatError(new Exception(msg), context, 404);
+        formatError(msg, context, 404);
     }
 
 

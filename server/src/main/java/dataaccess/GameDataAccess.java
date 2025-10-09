@@ -2,27 +2,38 @@ package dataaccess;
 
 import model.GameData;
 
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class GameDataAccess {
-    public GameDataAccess() {
-    }
+    private static final Map<Integer, GameData> gameInfo = new HashMap<>();
+    private static Integer nextGameNumber = 0;
 
     public static void clear() throws DataAccessException{
-        throw new DataAccessException("implement");
+        gameInfo.clear();
+        nextGameNumber = 1;
     }
 
-    public void createGame() throws DataAccessException{
-        throw new DataAccessException("implement");
+    public void createGame(GameData newGame) throws DataAccessException {
+        gameInfo.put(newGame.gameID(), newGame);
     }
 
-    public GameData getGame() throws DataAccessException{
-        throw new DataAccessException("implement");
+    public GameData getGame(Integer gameID) throws DataAccessException{
+        return gameInfo.get(gameID);
     }
 
-    public GameData[] listGames() throws DataAccessException{
-        throw new DataAccessException("implement");
+    public Collection<GameData> listGames() throws DataAccessException{
+        return gameInfo.values();
     }
 
-    public void updateGame() throws DataAccessException{
-        throw new DataAccessException("implement");
+    public void updateGame(GameData game) throws DataAccessException{
+        gameInfo.replace(game.gameID(), game);
+    }
+
+    public int getGameID() {
+        nextGameNumber += 1;
+        return nextGameNumber;
     }
 }
