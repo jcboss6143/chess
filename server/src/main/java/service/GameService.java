@@ -54,7 +54,7 @@ public class GameService {
         GameDataAccess.updateGame(updatedGame);
     }
 
-    public static void changeNextGameNumber(int new_number) {
-        nextGameNumber = new_number;
+    public static void changeNextGameNumber(int newNumber) {
+        nextGameNumber = newNumber;
     }
 }
