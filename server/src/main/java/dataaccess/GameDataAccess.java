@@ -9,14 +9,12 @@ import java.util.Map;
 
 public class GameDataAccess {
     private static final Map<Integer, GameData> gameInfo = new HashMap<>();
-    private static Integer nextGameNumber = 0;
 
     public static void clear() throws DataAccessException{
         gameInfo.clear();
-        nextGameNumber = 1;
     }
 
-    public void createGame(GameData newGame) throws DataAccessException {
+    public void addGame(GameData newGame) throws DataAccessException {
         gameInfo.put(newGame.gameID(), newGame);
     }
 
@@ -32,8 +30,4 @@ public class GameDataAccess {
         gameInfo.replace(game.gameID(), game);
     }
 
-    public int getGameID() {
-        nextGameNumber += 1;
-        return nextGameNumber;
-    }
 }

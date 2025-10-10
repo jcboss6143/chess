@@ -1,6 +1,6 @@
 package service.model;
 
-import chess.ChessGame;
+import model.GameData;
 
-public record ListGamesResult(ChessGame[] games) {
+public record ListGamesResult(GameData[] games) {
 }

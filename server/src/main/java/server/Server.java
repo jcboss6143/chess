@@ -12,10 +12,7 @@ import service.UserService;
 import service.model.CreateGameRequest;
 import service.model.JoinGameRequest;
 import service.model.LoginRequest;
-
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
 
 
 public class Server {
@@ -31,16 +28,13 @@ public class Server {
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("games", this::joinGame);
-
         server.exception(Exception.class, this::exceptionHandler);
         server.error(404, this::notFoundError);
     }
 
-    private void formatError(String errorMessage, Context context, int statusNumber) {
-        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", errorMessage)));
-        context.status(statusNumber);
-        context.result(body);
-    }
+
+
+    // =============== Error Handling  =============== //
 
     private void exceptionHandler(Exception e, Context context) {
         String errorMessage = e.getMessage();
@@ -52,28 +46,26 @@ public class Server {
         }
     }
 
+    private void formatError(String errorMessage, Context context, int statusNumber) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", errorMessage)));
+        context.status(statusNumber);
+        context.result(body);
+    }
+
     private void notFoundError(Context context) {
         String msg = String.format("[%s] %s not found", context.method(), context.path());
         formatError(msg, context, 404);
     }
 
 
-    // need these functional interfaces to handle errors thrown by the Service Methods passed into service Caller
-    @FunctionalInterface
-    public interface ServiceMethod<T, R> {
-        R apply(T t) throws ServiceException, DataAccessException;
-    }
 
-    @FunctionalInterface
-    public interface VoidServiceMethod<T> {
-        void apply(T t) throws ServiceException, DataAccessException;
-    }
+    // =============== Service Callers =============== //
 
     private <T,R> void serviceCaller(Context ctx, T recordObject, ServiceMethod<T, R> serviceMethod)
             throws ServiceException, DataAccessException {
         // passes object to the desired Service Method
         R responseData = serviceMethod.apply(recordObject);
-        // Convert result to json and send to client
+        // Converts result to json and sends result to client
         String json = new Gson().toJson(responseData);
         ctx.result(json);
     }
@@ -84,7 +76,16 @@ public class Server {
         ctx.result("{}");
     }
 
+    // need these functional interfaces to handle errors thrown by the Service Methods passed into service Caller
+    @FunctionalInterface
+    public interface ServiceMethod<T, R> { R apply(T t) throws ServiceException, DataAccessException; }
 
+    @FunctionalInterface
+    public interface VoidServiceMethod<T> { void apply(T t) throws ServiceException, DataAccessException; }
+
+
+
+    // =============== Input Formatting =============== //
 
     private void register(Context ctx) throws ServiceException, DataAccessException  {
         UserData registerData = new Gson().fromJson(ctx.body(), UserData.class);
@@ -116,12 +117,14 @@ public class Server {
         serviceCaller(ctx, joinGameObject, GameService::joinGame);
     }
 
-
     private void clearApplication(Context ctx) throws DataAccessException {
         service.DatabaseService.deleteAllData();
         ctx.result("{}");
     }
 
+
+
+    // =============== Run and Stop  =============== //
 
     public int run(int desiredPort) {
         server.start(desiredPort);
