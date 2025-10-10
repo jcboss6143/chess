@@ -7,22 +7,15 @@ import dataaccess.UserDataAccess;
 import model.AuthData;
 
 public class CommonServices {
+
     public static void deleteAllData() throws DataAccessException{
         AuthDataAccess.clear();
         GameDataAccess.clear();
         UserDataAccess.clear();
     }
 
-    public static void deleteAuthData() throws DataAccessException{
-        AuthDataAccess.clear();
-    }
-
     public static void deleteGameData() throws DataAccessException{
         GameDataAccess.clear();
-    }
-
-    public static void deleteUserData() throws DataAccessException{
-        UserDataAccess.clear();
     }
 
     public static AuthData getAndVerifyAuthData(String authToken) throws ServiceException, DataAccessException {

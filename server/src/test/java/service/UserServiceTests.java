@@ -26,7 +26,6 @@ public class UserServiceTests {
     }
 
 
-
     @Test
     @DisplayName("Register New User")
     public void registerUserSuccess() throws DataAccessException {
@@ -48,7 +47,6 @@ public class UserServiceTests {
         Assertions.assertEquals("403", exception.getMessage());
     }
 
-
     @Test
     @DisplayName("logging out when user has active token")
     public void logoutWithValidToken() throws DataAccessException {
@@ -57,7 +55,6 @@ public class UserServiceTests {
             UserService.logout(userObjectAuthData.authToken());
         });
     }
-
 
     @Test
     @DisplayName("logging out when user doesn't has active token")
@@ -69,7 +66,6 @@ public class UserServiceTests {
         Assertions.assertEquals("401", exception.getMessage());
     }
 
-
     @Test
     @DisplayName("logging in when user doesn't have active token")
     public void logInWithoutActiveToken() throws DataAccessException {
@@ -79,8 +75,6 @@ public class UserServiceTests {
             validateAuthData(authObject);
         });
     }
-
-
 
     @Test
     @DisplayName("logging in when user still has active token")

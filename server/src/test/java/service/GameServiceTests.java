@@ -13,11 +13,11 @@ import service.model.ListGamesResult;
 
 
 public class GameServiceTests {
-    private AuthData testUser1AuthData;
-    private AuthData testUser2AuthData;
-    private AuthData testUser3AuthData;
-    private AuthData testUser4AuthData;
-    private AuthData testUser5AuthData;
+    private final AuthData testUser1AuthData;
+    private final AuthData testUser2AuthData;
+    private final AuthData testUser3AuthData;
+    private final AuthData testUser4AuthData;
+    private final AuthData testUser5AuthData;
 
     public GameServiceTests() throws ServiceException, DataAccessException {
         CommonServices.deleteAllData();
@@ -35,7 +35,6 @@ public class GameServiceTests {
         GameService.createGame(new CreateGameRequest(testUser2AuthData.authToken(), "Test_Game2"));
         GameService.createGame(new CreateGameRequest(testUser3AuthData.authToken(), "Test_Game3"));
     }
-
 
     private void player4JoinGame() throws ServiceException, DataAccessException{
         JoinGameRequest joinRequest = new JoinGameRequest(testUser4AuthData.authToken(), "WHITE", 1001);
@@ -74,7 +73,6 @@ public class GameServiceTests {
         });
         Assertions.assertEquals("401", exception.getMessage());
     }
-
 
     @Test
     @DisplayName("join a game")
@@ -118,7 +116,6 @@ public class GameServiceTests {
         Assertions.assertEquals("400", exception.getMessage());
     }
 
-
     @Test
     @DisplayName("join a game that has been taken")
     public void joinGamePlaceTaken() throws DataAccessException {
@@ -130,7 +127,6 @@ public class GameServiceTests {
         });
         Assertions.assertEquals("403", exception.getMessage());
     }
-
 
     @Test
     @DisplayName("List games")
@@ -146,7 +142,6 @@ public class GameServiceTests {
             }
         });
     }
-
 
     @Test
     @DisplayName("user had bad authToken when listing games")

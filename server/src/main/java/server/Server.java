@@ -32,11 +32,6 @@ public class Server {
         server.error(404, this::notFoundError);
     }
 
-//    private void requestDebugging(Context ctx) {
-//        System.out.println(ctx.body());
-//        System.out.println(ctx.header("authorization"));
-//    }
-
 
 
     // =============== Error Handling  =============== //
@@ -68,9 +63,7 @@ public class Server {
 
     private <T,R> void serviceCaller(Context ctx, T recordObject, ServiceMethod<T, R> serviceMethod)
             throws ServiceException, DataAccessException {
-        // passes object to the desired Service Method
-        R responseData = serviceMethod.apply(recordObject);
-        // Converts result to json and sends result to client
+        R responseData = serviceMethod.apply(recordObject); // passes object to desired Service
         String json = new Gson().toJson(responseData);
         ctx.result(json);
     }
@@ -81,7 +74,7 @@ public class Server {
         ctx.result("{}");
     }
 
-    // need these functional interfaces to handle errors thrown by the Service Methods passed into service Caller
+    // need these functional interfaces to handle errors thrown by ServiceMethod in serviceCaller
     @FunctionalInterface
     public interface ServiceMethod<T, R> { R apply(T t) throws ServiceException, DataAccessException; }
 

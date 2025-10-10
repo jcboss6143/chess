@@ -1,12 +1,9 @@
 package service;
 
-import com.google.gson.Gson;
 import dataaccess.AuthDataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
-import dataaccess.UserDataAccess;
 import model.GameData;
-import model.UserData;
 import service.model.CreateGameRequest;
 import service.model.CreateGameResult;
 import service.model.JoinGameRequest;
@@ -36,9 +33,7 @@ public class GameService {
     }
 
     public static void joinGame(JoinGameRequest joinGameRequest) throws ServiceException, DataAccessException {
-        // verifying all the required data has been submitted
-        if ((joinGameRequest.playerColor() == null) || (joinGameRequest.authToken() == null)){
-            throw new ServiceException("400"); }
+        if (joinGameRequest.playerColor() == null){ throw new ServiceException("400"); }
         CommonServices.getAndVerifyAuthData(joinGameRequest.authToken());
         GameData gameToJoin = GameDataAccess.getGame(joinGameRequest.gameID());
         String color = joinGameRequest.playerColor();
@@ -58,7 +53,6 @@ public class GameService {
         GameData updatedGame = new GameData(gameToJoin.gameID(), whiteSeat, blackSeat, gameToJoin.gameName());
         GameDataAccess.updateGame(updatedGame);
     }
-
 
     public static void changeNextGameNumber(int new_number) {
         nextGameNumber = new_number;
