@@ -32,9 +32,9 @@ public class UserService {
         UserData userProfile = UserDataAccess.getUser(loginRequest.username());
         if ((userProfile == null) || (!Objects.equals(userProfile.password(), loginRequest.password()))) {
             throw new ServiceException("401"); }
-        // checks if user is already logged in, and deletes their current auth token if so
-        String existingAuthToken = AuthDataAccess.getAuthToken(loginRequest.username());
-        if (existingAuthToken != null) { AuthDataAccess.deleteAuth(AuthDataAccess.getAuthData(existingAuthToken)); }
+//        // checks if user is already logged in, and deletes their current auth token if so
+//        String existingAuthToken = AuthDataAccess.getAuthToken(loginRequest.username());
+//        if (existingAuthToken != null) { AuthDataAccess.deleteAuth(AuthDataAccess.getAuthData(existingAuthToken)); }
         return createAuthObject(loginRequest.username());
     }
 

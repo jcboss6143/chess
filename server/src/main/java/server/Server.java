@@ -32,6 +32,11 @@ public class Server {
         server.error(404, this::notFoundError);
     }
 
+//    private void requestDebugging(Context ctx) {
+//        System.out.println(ctx.body());
+//        System.out.println(ctx.header("authorization"));
+//    }
+
 
 
     // =============== Error Handling  =============== //
