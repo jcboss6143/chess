@@ -6,17 +6,17 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class UserDataAccess {
-    private static final Map<String, UserData> UserInfo = new HashMap<>();
+    private static final Map<String, UserData> USER_INFO = new HashMap<>();
 
     public static void clear() throws DataAccessException {
-        UserInfo.clear();
+        USER_INFO.clear();
     }
 
     public static void addUser(UserData userData) throws DataAccessException {
-        UserInfo.put(userData.username(), userData);
+        USER_INFO.put(userData.username(), userData);
     }
 
     public static UserData getUser(String username) throws DataAccessException {
-        return UserInfo.get(username);
+        return USER_INFO.get(username);
     }
 }

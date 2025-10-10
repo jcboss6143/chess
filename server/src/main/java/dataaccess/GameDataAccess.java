@@ -8,26 +8,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GameDataAccess {
-    private static final Map<Integer, GameData> GameInfo = new HashMap<>();
+    private static final Map<Integer, GameData> GAME_INFO = new HashMap<>();
 
     public static void clear() throws DataAccessException{
-        GameInfo.clear();
+        GAME_INFO.clear();
     }
 
     public static void addGame(GameData newGame) throws DataAccessException {
-        GameInfo.put(newGame.gameID(), newGame);
+        GAME_INFO.put(newGame.gameID(), newGame);
     }
 
     public static GameData getGame(Integer gameID) throws DataAccessException{
-        return GameInfo.get(gameID);
+        return GAME_INFO.get(gameID);
     }
 
     public static Collection<GameData> listGames() throws DataAccessException{
-        return GameInfo.values();
+        return GAME_INFO.values();
     }
 
     public static void updateGame(GameData game) throws DataAccessException{
-        GameInfo.replace(game.gameID(), game);
+        GAME_INFO.replace(game.gameID(), game);
     }
 
 }
