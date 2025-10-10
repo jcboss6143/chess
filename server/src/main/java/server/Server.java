@@ -27,7 +27,7 @@ public class Server {
         server.delete("session", this::logout);
         server.get("game", this::listGames);
         server.post("game", this::createGame);
-        server.put("games", this::joinGame);
+        server.put("game", this::joinGame);
         server.exception(Exception.class, this::exceptionHandler);
         server.error(404, this::notFoundError);
     }

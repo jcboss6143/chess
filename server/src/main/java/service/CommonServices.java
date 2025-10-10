@@ -26,6 +26,7 @@ public class CommonServices {
     }
 
     public static AuthData getAndVerifyAuthData(String authToken) throws ServiceException, DataAccessException {
+        if (authToken == null) { throw new ServiceException("400"); }
         AuthData authInfo = AuthDataAccess.getAuthData(authToken);
         if (authInfo == null) { throw new ServiceException("401"); } // not a valid auth token
         return authInfo;

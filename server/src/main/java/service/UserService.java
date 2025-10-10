@@ -13,7 +13,10 @@ import java.util.Objects;
 public class UserService {
 
     public static AuthData register(UserData registerRequest) throws ServiceException, DataAccessException {
-        //verifying username is available and adding user
+        // verifying all the required data has been submitted
+        if ((registerRequest.password() == null) || (registerRequest.username() == null) || (registerRequest.email() == null)){
+            throw new ServiceException("400"); }
+        // verifying username is available and adding user
         UserData existingUser = UserDataAccess.getUser(registerRequest.username());
         if (existingUser != null){ throw new ServiceException("403"); }
         // adds user and returns authData for user
@@ -22,6 +25,9 @@ public class UserService {
     }
 
     public static AuthData login(LoginRequest loginRequest) throws ServiceException, DataAccessException {
+        // verifying all the required data has been submitted
+        if ((loginRequest.password() == null) || (loginRequest.username() == null)){
+            throw new ServiceException("400"); }
         // verifies user exists and passwords match
         UserData userProfile = UserDataAccess.getUser(loginRequest.username());
         if ((userProfile == null) || (!Objects.equals(userProfile.password(), loginRequest.password()))) {

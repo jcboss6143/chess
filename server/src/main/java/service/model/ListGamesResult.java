@@ -2,5 +2,7 @@ package service.model;
 
 import model.GameData;
 
-public record ListGamesResult(GameData[] games) {
+import java.util.Collection;
+
+public record ListGamesResult(Collection<GameData> games) {
 }

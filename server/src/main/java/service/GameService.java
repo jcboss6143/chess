@@ -1,5 +1,6 @@
 package service;
 
+import com.google.gson.Gson;
 import dataaccess.AuthDataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
@@ -16,17 +17,17 @@ import java.util.Objects;
 
 
 public class GameService {
-    private static Integer nextGameNumber = 0;
+    private static Integer nextGameNumber = 1001;
 
     public static ListGamesResult listGames(String authToken) throws ServiceException, DataAccessException {
         CommonServices.getAndVerifyAuthData(authToken);
         Collection<GameData> gameData = GameDataAccess.listGames();
-        Collection<String> formattedGameData;
+        return new ListGamesResult(gameData);
     }
 
     public static CreateGameResult createGame(CreateGameRequest makeGameRequest) throws ServiceException, DataAccessException {
+        if (makeGameRequest.gameName() == null){ throw new ServiceException("400"); } // can't have empty game name
         CommonServices.getAndVerifyAuthData(makeGameRequest.authToken());
-        if (makeGameRequest.gameName() == null) { throw new ServiceException("400"); } // can't have empty game name
         while (GameDataAccess.getGame(nextGameNumber) != null) { nextGameNumber += 1; } // makes sure we don't have duplicate gameIDs
         GameData newGame = new GameData(nextGameNumber, null, null, makeGameRequest.gameName());
         nextGameNumber += 1;
@@ -35,6 +36,9 @@ public class GameService {
     }
 
     public static void joinGame(JoinGameRequest joinGameRequest) throws ServiceException, DataAccessException {
+        // verifying all the required data has been submitted
+        if ((joinGameRequest.playerColor() == null) || (joinGameRequest.authToken() == null)){
+            throw new ServiceException("400"); }
         CommonServices.getAndVerifyAuthData(joinGameRequest.authToken());
         GameData gameToJoin = GameDataAccess.getGame(joinGameRequest.gameID());
         String color = joinGameRequest.playerColor();
