@@ -20,7 +20,7 @@ public class UserServiceTests {
     }
 
     public void registerAndLogOut() throws DataAccessException, ServiceException {
-        DatabaseService.deleteAllData();
+        CommonServices.deleteAllData();
         userObjectAuthData = UserService.register(userObject);
         UserService.logout(userObjectAuthData.authToken());
     }
@@ -30,7 +30,7 @@ public class UserServiceTests {
     @Test
     @DisplayName("Register New User")
     public void registerUserSuccess() throws DataAccessException {
-        DatabaseService.deleteAllData();
+        CommonServices.deleteAllData();
         Assertions.assertDoesNotThrow(() -> {
             userObjectAuthData = UserService.register(userObject);
             validateAuthData(userObjectAuthData);
@@ -62,7 +62,7 @@ public class UserServiceTests {
     @Test
     @DisplayName("logging out when user doesn't has active token")
     public void logoutWithoutValidToken() throws DataAccessException {
-        DatabaseService.deleteAllData();
+        CommonServices.deleteAllData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             UserService.logout("Invalid_auth_token");
         });

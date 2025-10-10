@@ -19,12 +19,11 @@ public class GameServiceTests {
     private AuthData testUser4AuthData = UserService.register(new UserData("new_player", "test4", "new_player.Email@google.com"));
     private AuthData testUser5AuthData = UserService.register(new UserData("new_player2", "test5", "new_player2.Email@google.com"));
 
-
     public GameServiceTests() throws ServiceException, DataAccessException {
     }
 
     public void createTestGames() throws ServiceException, DataAccessException {
-        DatabaseService.deleteGameData();
+        CommonServices.deleteGameData();
         GameService.createGame(new CreateGameRequest(testUser1AuthData.authToken(), "Test_Game1"));
         GameService.createGame(new CreateGameRequest(testUser2AuthData.authToken(), "Test_Game2"));
         GameService.createGame(new CreateGameRequest(testUser3AuthData.authToken(), "Test_Game3"));
@@ -41,7 +40,7 @@ public class GameServiceTests {
     @Test
     @DisplayName("create new game")
     public void createGameSuccess() throws DataAccessException {
-        DatabaseService.deleteGameData();
+        CommonServices.deleteGameData();
         Assertions.assertDoesNotThrow(() -> {
             CreateGameRequest newGameRequest = new CreateGameRequest(testUser1AuthData.authToken(), "Test_Game1");
             GameService.createGame(newGameRequest);
@@ -51,7 +50,7 @@ public class GameServiceTests {
     @Test
     @DisplayName("user didn't enter a name")
     public void createGameBadName() throws DataAccessException {
-        DatabaseService.deleteGameData();
+        CommonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             CreateGameRequest newGameRequest = new CreateGameRequest(testUser1AuthData.authToken(), null);
             GameService.createGame(newGameRequest);
@@ -62,7 +61,7 @@ public class GameServiceTests {
     @Test
     @DisplayName("user had bad authToken when creating game")
     public void createGameBadAuth() throws DataAccessException {
-        DatabaseService.deleteGameData();
+        CommonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             CreateGameRequest newGameRequest = new CreateGameRequest("Bad AuthToken", "Test_Game1");
             GameService.createGame(newGameRequest);
@@ -165,11 +164,10 @@ public class GameServiceTests {
         });
     }
 
-
     @Test
     @DisplayName("user had bad authToken when listing games")
     public void listGameBadAuth() throws DataAccessException {
-        DatabaseService.deleteGameData();
+        CommonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
             GameService.listGames("bad AuthToken");

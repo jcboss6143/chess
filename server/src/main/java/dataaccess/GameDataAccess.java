@@ -14,19 +14,19 @@ public class GameDataAccess {
         gameInfo.clear();
     }
 
-    public void addGame(GameData newGame) throws DataAccessException {
+    public static void addGame(GameData newGame) throws DataAccessException {
         gameInfo.put(newGame.gameID(), newGame);
     }
 
-    public GameData getGame(Integer gameID) throws DataAccessException{
+    public static GameData getGame(Integer gameID) throws DataAccessException{
         return gameInfo.get(gameID);
     }
 
-    public Collection<GameData> listGames() throws DataAccessException{
+    public static Collection<GameData> listGames() throws DataAccessException{
         return gameInfo.values();
     }
 
-    public void updateGame(GameData game) throws DataAccessException{
+    public static void updateGame(GameData game) throws DataAccessException{
         gameInfo.replace(game.gameID(), game);
     }
 

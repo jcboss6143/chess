@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.AuthData;
 import model.UserData;
+import service.CommonServices;
 import service.GameService;
 import service.ServiceException;
 import service.UserService;
@@ -118,7 +118,7 @@ public class Server {
     }
 
     private void clearApplication(Context ctx) throws DataAccessException {
-        service.DatabaseService.deleteAllData();
+        CommonServices.deleteAllData();
         ctx.result("{}");
     }
 

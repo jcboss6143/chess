@@ -4,8 +4,9 @@ import dataaccess.AuthDataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
 import dataaccess.UserDataAccess;
+import model.AuthData;
 
-public class DatabaseService {
+public class CommonServices {
     public static void deleteAllData() throws DataAccessException{
         AuthDataAccess.clear();
         GameDataAccess.clear();
@@ -22,5 +23,11 @@ public class DatabaseService {
 
     public static void deleteUserData() throws DataAccessException{
         UserDataAccess.clear();
+    }
+
+    public static AuthData getAndVerifyAuthData(String authToken) throws ServiceException, DataAccessException {
+        AuthData authInfo = AuthDataAccess.getAuthData(authToken);
+        if (authInfo == null) { throw new ServiceException("401"); } // not a valid auth token
+        return authInfo;
     }
 }
