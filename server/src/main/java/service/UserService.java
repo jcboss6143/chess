@@ -38,7 +38,9 @@ public class UserService {
 
 
     public static void logout(String authToken) throws ServiceException, DataAccessException {
-        throw new ServiceException("implement");
+        AuthData authInfo = AuthDataAccess.getAuthData(authToken);
+        if (authInfo == null) { throw new ServiceException("401"); } // not a valid auth token
+        AuthDataAccess.deleteAuth(authInfo);
     }
 
 
