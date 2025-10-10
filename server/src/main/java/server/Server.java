@@ -6,10 +6,16 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
 import model.UserData;
+import service.GameService;
 import service.ServiceException;
 import service.UserService;
+import service.model.CreateGameRequest;
+import service.model.JoinGameRequest;
+import service.model.LoginRequest;
+
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 
 public class Server {
@@ -33,7 +39,7 @@ public class Server {
     private void formatError(String errorMessage, Context context, int statusNumber) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", errorMessage)));
         context.status(statusNumber);
-        context.json(body);
+        context.result(body);
     }
 
     private void exceptionHandler(Exception e, Context context) {
@@ -52,42 +58,69 @@ public class Server {
     }
 
 
+    // need these functional interfaces to handle errors thrown by the Service Methods passed into service Caller
+    @FunctionalInterface
+    public interface ServiceMethod<T, R> {
+        R apply(T t) throws ServiceException, DataAccessException;
+    }
+
+    @FunctionalInterface
+    public interface VoidServiceMethod<T> {
+        void apply(T t) throws ServiceException, DataAccessException;
+    }
+
+    private <T,R> void serviceCaller(Context ctx, T recordObject, ServiceMethod<T, R> serviceMethod)
+            throws ServiceException, DataAccessException {
+        // passes object to the desired Service Method
+        R responseData = serviceMethod.apply(recordObject);
+        // Convert result to json and send to client
+        String json = new Gson().toJson(responseData);
+        ctx.result(json);
+    }
+
+    private <T> void serviceCaller(Context ctx, T recordObject, VoidServiceMethod<T> serviceMethod)
+            throws ServiceException, DataAccessException {
+        serviceMethod.apply(recordObject);
+        ctx.result("{}");
+    }
+
+
+
+    private void register(Context ctx) throws ServiceException, DataAccessException  {
+        UserData registerData = new Gson().fromJson(ctx.body(), UserData.class);
+        serviceCaller(ctx, registerData, UserService::register);
+    }
+
+    private void login(Context ctx) throws ServiceException, DataAccessException  {
+        LoginRequest loginData = new Gson().fromJson(ctx.body(), LoginRequest.class);
+        serviceCaller(ctx, loginData, UserService::login);
+    }
+
+    private void logout(Context ctx) throws ServiceException, DataAccessException  {
+        serviceCaller(ctx, ctx.header("authorization"), UserService::logout);
+    }
+
+    private void listGames(Context ctx) throws ServiceException, DataAccessException  {
+        serviceCaller(ctx, ctx.header("authorization"), GameService::listGames);
+    }
+
+    private void createGame(Context ctx) throws ServiceException, DataAccessException  {
+        CreateGameRequest gameName = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
+        CreateGameRequest createGameObject = new CreateGameRequest(ctx.header("authorization"), gameName.gameName());
+        serviceCaller(ctx, createGameObject, GameService::createGame);
+    }
+
+    private void joinGame(Context ctx) throws ServiceException, DataAccessException  {
+        JoinGameRequest gameInfo = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+        JoinGameRequest joinGameObject = new JoinGameRequest(ctx.header("authorization"), gameInfo.playerColor(), gameInfo.gameID());
+        serviceCaller(ctx, joinGameObject, GameService::joinGame);
+    }
+
 
     private void clearApplication(Context ctx) throws DataAccessException {
         service.DatabaseService.deleteAllData();
         ctx.result("{}");
     }
-
-
-    private void register(Context ctx) throws ServiceException, DataAccessException  {
-        // register user
-        UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
-        AuthData authData = UserService.register(userData);
-        // Convert authData to json and send to client
-        String json = new Gson().toJson(authData);
-        ctx.result(json);
-    }
-
-    private void login(Context ctx) throws ServiceException, DataAccessException  {
-
-    }
-
-    private void logout(Context ctx) throws ServiceException, DataAccessException  {
-
-    }
-
-    private void listGames(Context ctx) throws ServiceException, DataAccessException  {
-
-    }
-
-    private void createGame(Context ctx) throws ServiceException, DataAccessException  {
-
-    }
-
-    private void joinGame(Context ctx) throws ServiceException, DataAccessException  {
-
-    }
-
 
 
     public int run(int desiredPort) {
