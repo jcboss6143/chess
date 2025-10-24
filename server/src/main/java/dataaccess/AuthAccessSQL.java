@@ -5,9 +5,10 @@ import model.*;
 import java.sql.*;
 
 import model.AuthData;
+import service.ServiceException;
 
 
-public class AuthAccessSQL implements AuthAccess{
+public class AuthAccessSQL implements AuthAccess, CommonAccessSQL{
 
     public AuthAccessSQL() throws DataAccessException {
         buildAuthTable();
@@ -15,94 +16,89 @@ public class AuthAccessSQL implements AuthAccess{
 
 
     public void clear() throws DataAccessException{
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "DROP TABLE authData";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to drop table: %s", ex.getMessage()));
-        }
+        String statement = "DROP TABLE authData";
+        String errorMessage = "Unable to drop table";
+        sendStatement(statement, errorMessage, this::executeUpdateCore, 1);
         buildAuthTable();
     }
 
 
+
     public void addAuthData(AuthData authData) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "INSERT INTO authData (username, authToken) VALUES (?, ?)";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1,authData.username());
-                preparedStatement.setString(2,authData.authToken());
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to add authData: %s", ex.getMessage()));
-        }
+        String statement = "INSERT INTO authData (username, authToken) VALUES (?, ?)";
+        String errorMessage = "Unable to add authData";
+        sendStatement(statement, errorMessage, this::addAuthDataCore, authData);
     }
+
+    public int addAuthDataCore(PreparedStatement preparedStatement, AuthData authData)  throws SQLException  {
+        preparedStatement.setString(1,authData.username());
+        preparedStatement.setString(2,authData.authToken());
+        preparedStatement.executeUpdate();
+        return 1;
+    }
+
 
 
     public AuthData getAuthData(String authToken) throws DataAccessException{
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "SELECT username, authToken FROM authData WHERE authToken=?";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1, authToken);
-                try (var rs = preparedStatement.executeQuery()) {
-                    if (rs.next()) {
-                        String username = rs.getString("username");
-                        return new AuthData(authToken, username);
-                    }
-                    return null;
-                }
+        String statement = "SELECT username, authToken FROM authData WHERE authToken=?";
+        String errorMessage = "Unable to fetch authData";
+        return sendStatement(statement, errorMessage, this::getAuthDataCore, authToken);
+    }
+
+    private AuthData getAuthDataCore(PreparedStatement preparedStatement, String authToken) throws SQLException {
+        preparedStatement.setString(1, authToken);
+        try (var rs = preparedStatement.executeQuery()) {
+            if (rs.next()) {
+                String username = rs.getString("username");
+                return new AuthData(authToken, username);
             }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to fetch authData: %s", ex.getMessage()));
+            return null;
         }
     }
+
+
 
 
     public String getAuthToken(String username) throws DataAccessException{
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "SELECT username, authToken FROM authData WHERE username=?";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1, username);
-                try (var rs = preparedStatement.executeQuery()) {
-                    if (rs.next()) { return rs.getString("authToken"); }
-                    return null;
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to get token: %s", ex.getMessage()));
+        String statement = "SELECT username, authToken FROM authData WHERE username=?";
+        String errorMessage = "Unable to get token";
+        return sendStatement(statement, errorMessage, this::getAuthTokenCore, username);
+    }
+
+    public String getAuthTokenCore(PreparedStatement preparedStatement, String username) throws SQLException {
+        preparedStatement.setString(1, username);
+        try (var rs = preparedStatement.executeQuery()) {
+            if (rs.next()) { return rs.getString("authToken"); }
+            return null;
         }
     }
+
 
 
     public void deleteAuth(AuthData authData) throws DataAccessException{
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "DELETE FROM authData WHERE authToken=?";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1, authData.authToken());
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to delete authData: %s", ex.getMessage()));
-        }
+        String statement = "DELETE FROM authData WHERE authToken=?";
+        String errorMessage = "Unable to delete authData";
+        sendStatement(statement, errorMessage, this::deleteAuthCore, authData);
     }
+
+    public int deleteAuthCore(PreparedStatement preparedStatement, AuthData authData) throws SQLException {
+        preparedStatement.setString(1, authData.authToken());
+        preparedStatement.executeUpdate();
+        return 1;
+    }
+
 
 
     private void buildAuthTable() throws DataAccessException{
         DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = """
+        String statement = """
                 CREATE TABLE IF NOT EXISTS  authData (
                  username varchar(256) NOT NULL,
                  authToken varchar(256) NOT NULL,
                 PRIMARY KEY (authToken)  )
             """;
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure table authData: %s", ex.getMessage()));
-        }
+        String errorMessage = "Unable to configure table authData";
+        sendStatement(statement, errorMessage, this::executeUpdateCore, 1);
     }
+
 }
