@@ -1,6 +1,6 @@
 package service;
 
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
@@ -12,6 +12,16 @@ public class UserServiceTests {
 
     private final UserData userObject = new UserData("Joe", "J03s-p4ssw0rd", "Joe.Email@google.com");
     private AuthData userObjectAuthData = null;
+    private final CommonServices commonServices;
+    private final UserService userService;
+
+    public UserServiceTests() {
+        AuthAccess authAccess = new AuthDataAccess();
+        GameAccess gameAccess = new GameDataAccess();
+        UserAccess userAccess = new UserDataAccess();
+        this.commonServices = new CommonServices(authAccess, gameAccess, userAccess);
+        this.userService = new UserService(authAccess, userAccess, commonServices);
+    }
 
     public void validateAuthData(AuthData authData) {
         Assertions.assertEquals(authData.username(), userObject.username());
@@ -20,18 +30,18 @@ public class UserServiceTests {
     }
 
     public void registerAndLogOut() throws DataAccessException, ServiceException {
-        CommonServices.deleteAllData();
-        userObjectAuthData = UserService.register(userObject);
-        UserService.logout(userObjectAuthData.authToken());
+        commonServices.deleteAllData();
+        userObjectAuthData = userService.register(userObject);
+        userService.logout(userObjectAuthData.authToken());
     }
 
 
     @Test
     @DisplayName("Register New User")
     public void registerUserSuccess() throws DataAccessException {
-        CommonServices.deleteAllData();
+        commonServices.deleteAllData();
         Assertions.assertDoesNotThrow(() -> {
-            userObjectAuthData = UserService.register(userObject);
+            userObjectAuthData = userService.register(userObject);
             validateAuthData(userObjectAuthData);
         });
     }
@@ -42,7 +52,7 @@ public class UserServiceTests {
         registerUserSuccess();
         UserData userObject2 = new UserData("Joe", "J03s-p4ssw0rd2", "Joe.Email2@google.com");
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            AuthData authObject = UserService.register(userObject2);
+            AuthData authObject = userService.register(userObject2);
         });
         Assertions.assertEquals("403", exception.getMessage());
     }
@@ -52,16 +62,16 @@ public class UserServiceTests {
     public void logoutWithValidToken() throws DataAccessException {
         registerUserSuccess();
         Assertions.assertDoesNotThrow(() -> {
-            UserService.logout(userObjectAuthData.authToken());
+            userService.logout(userObjectAuthData.authToken());
         });
     }
 
     @Test
     @DisplayName("logging out when user doesn't has active token")
     public void logoutWithoutValidToken() throws DataAccessException {
-        CommonServices.deleteAllData();
+        commonServices.deleteAllData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            UserService.logout("Invalid_auth_token");
+            userService.logout("Invalid_auth_token");
         });
         Assertions.assertEquals("401", exception.getMessage());
     }
@@ -71,7 +81,7 @@ public class UserServiceTests {
     public void logInWithoutActiveToken() throws DataAccessException {
         Assertions.assertDoesNotThrow(() -> {
             registerAndLogOut();
-            AuthData authObject = UserService.login(new LoginRequest(userObject.username(), userObject.password()));
+            AuthData authObject = userService.login(new LoginRequest(userObject.username(), userObject.password()));
             validateAuthData(authObject);
         });
     }
@@ -81,7 +91,7 @@ public class UserServiceTests {
     public void logInWithActiveToken() throws DataAccessException {
         registerUserSuccess();
         Assertions.assertDoesNotThrow(() -> {
-            AuthData authObject = UserService.login(new LoginRequest(userObject.username(), userObject.password()));
+            AuthData authObject = userService.login(new LoginRequest(userObject.username(), userObject.password()));
             validateAuthData(authObject);
         });
     }
@@ -92,7 +102,7 @@ public class UserServiceTests {
         registerUserSuccess();
         Assertions.assertDoesNotThrow(this::registerAndLogOut);
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            UserService.login(new LoginRequest("NotJoe", userObject.password()));
+            userService.login(new LoginRequest("NotJoe", userObject.password()));
         });
         Assertions.assertEquals("401", exception.getMessage());
     }
@@ -103,7 +113,7 @@ public class UserServiceTests {
         registerUserSuccess();
         Assertions.assertDoesNotThrow(this::registerAndLogOut);
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            UserService.login(new LoginRequest(userObject.username(), "N0t-J03s-P4ssw0rd"));
+            userService.login(new LoginRequest(userObject.username(), "N0t-J03s-P4ssw0rd"));
         });
         Assertions.assertEquals("401", exception.getMessage());
     }

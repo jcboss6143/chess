@@ -1,6 +1,6 @@
 package service;
 
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -19,46 +19,59 @@ public class GameServiceTests {
     private final AuthData testUser4AuthData;
     private final AuthData testUser5AuthData;
 
+
+    private final CommonServices commonServices;
+    private final UserService userService;
+    private final GameService gameService;
+
+
+
     public GameServiceTests() throws ServiceException, DataAccessException {
-        CommonServices.deleteAllData();
-        testUser1AuthData = UserService.register(new UserData("Joe", "test1", "Joe.Email@google.com"));
-        testUser2AuthData = UserService.register(new UserData("Jonny", "test2", "Jonny.Email@google.com"));
-        testUser3AuthData = UserService.register(new UserData("Josh", "test3", "Josh.Email@google.com"));
-        testUser4AuthData = UserService.register(new UserData("new_player", "test4", "new_player.Email@google.com"));
-        testUser5AuthData = UserService.register(new UserData("new_player2", "test5", "new_player2.Email@google.com"));
+        AuthAccess authAccess = new AuthDataAccess();
+        GameAccess gameAccess = new GameDataAccess();
+        UserAccess userAccess = new UserDataAccess();
+        this.commonServices = new CommonServices(authAccess, gameAccess, userAccess);
+        this.userService = new UserService(authAccess, userAccess, commonServices);
+        this.gameService = new GameService(commonServices, gameAccess, authAccess);
+        commonServices.deleteAllData();
+        testUser1AuthData = userService.register(new UserData("Joe", "test1", "Joe.Email@google.com"));
+        testUser2AuthData = userService.register(new UserData("Jonny", "test2", "Jonny.Email@google.com"));
+        testUser3AuthData = userService.register(new UserData("Josh", "test3", "Josh.Email@google.com"));
+        testUser4AuthData = userService.register(new UserData("new_player", "test4", "new_player.Email@google.com"));
+        testUser5AuthData = userService.register(new UserData("new_player2", "test5", "new_player2.Email@google.com"));
     }
 
     public void createTestGames() throws ServiceException, DataAccessException {
-        CommonServices.deleteGameData();
-        GameService.changeNextGameNumber(1001);
-        GameService.createGame(new CreateGameRequest(testUser1AuthData.authToken(), "Test_Game1"));
-        GameService.createGame(new CreateGameRequest(testUser2AuthData.authToken(), "Test_Game2"));
-        GameService.createGame(new CreateGameRequest(testUser3AuthData.authToken(), "Test_Game3"));
+        commonServices.deleteGameData();
+        gameService.changeNextGameNumber(1001);
+        gameService.createGame(new CreateGameRequest(testUser1AuthData.authToken(), "Test_Game1"));
+        gameService.createGame(new CreateGameRequest(testUser2AuthData.authToken(), "Test_Game2"));
+        gameService.createGame(new CreateGameRequest(testUser3AuthData.authToken(), "Test_Game3"));
     }
 
     private void player4JoinGame() throws ServiceException, DataAccessException{
         JoinGameRequest joinRequest = new JoinGameRequest(testUser4AuthData.authToken(), "WHITE", 1001);
-        GameService.joinGame(joinRequest);
+        gameService.joinGame(joinRequest);
     }
 
 
     @Test
     @DisplayName("create new game")
     public void createGameSuccess() throws DataAccessException {
-        CommonServices.deleteGameData();
+        commonServices.deleteGameData();
         Assertions.assertDoesNotThrow(() -> {
             CreateGameRequest newGameRequest = new CreateGameRequest(testUser1AuthData.authToken(), "Test_Game1");
-            GameService.createGame(newGameRequest);
+            gameService.createGame(newGameRequest);
         });
     }
 
     @Test
     @DisplayName("user didn't enter a name")
     public void createGameBadName() throws DataAccessException {
-        CommonServices.deleteGameData();
+        commonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             CreateGameRequest newGameRequest = new CreateGameRequest(testUser1AuthData.authToken(), null);
-            GameService.createGame(newGameRequest);
+            gameService.createGame(newGameRequest);
         });
         Assertions.assertEquals("400", exception.getMessage());
     }
@@ -66,10 +79,10 @@ public class GameServiceTests {
     @Test
     @DisplayName("user had bad authToken when creating game")
     public void createGameBadAuth() throws DataAccessException {
-        CommonServices.deleteGameData();
+        commonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             CreateGameRequest newGameRequest = new CreateGameRequest("Bad AuthToken", "Test_Game1");
-            GameService.createGame(newGameRequest);
+            gameService.createGame(newGameRequest);
         });
         Assertions.assertEquals("401", exception.getMessage());
     }
@@ -89,7 +102,7 @@ public class GameServiceTests {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
             JoinGameRequest joinRequest = new JoinGameRequest("Bad AuthToken", "WHITE", 1001);
-            GameService.joinGame(joinRequest);
+            gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("401", exception.getMessage());
     }
@@ -100,7 +113,7 @@ public class GameServiceTests {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
             JoinGameRequest joinRequest = new JoinGameRequest(testUser4AuthData.authToken(), "WHITE", 27);
-            GameService.joinGame(joinRequest);
+            gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("400", exception.getMessage());
     }
@@ -111,7 +124,7 @@ public class GameServiceTests {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
             JoinGameRequest joinRequest = new JoinGameRequest(testUser4AuthData.authToken(), "notWhite", 1001);
-            GameService.joinGame(joinRequest);
+            gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("400", exception.getMessage());
     }
@@ -123,7 +136,7 @@ public class GameServiceTests {
             createTestGames();
             player4JoinGame();
             JoinGameRequest joinRequest = new JoinGameRequest(testUser5AuthData.authToken(), "WHITE", 1001);
-            GameService.joinGame(joinRequest);
+            gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("403", exception.getMessage());
     }
@@ -133,7 +146,7 @@ public class GameServiceTests {
     public void listGamesSuccess() throws DataAccessException {
         Assertions.assertDoesNotThrow(() -> {
             createTestGames();
-            ListGamesResult activeGames = GameService.listGames(testUser4AuthData.authToken());
+            ListGamesResult activeGames = gameService.listGames(testUser4AuthData.authToken());
             Assertions.assertEquals(3, activeGames.games().size());
             for (GameData game: activeGames.games()){
                 Assertions.assertNull(game.whiteUsername());
@@ -146,10 +159,10 @@ public class GameServiceTests {
     @Test
     @DisplayName("user had bad authToken when listing games")
     public void listGameBadAuth() throws DataAccessException {
-        CommonServices.deleteGameData();
+        commonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
-            GameService.listGames("bad AuthToken");
+            gameService.listGames("bad AuthToken");
         });
         Assertions.assertEquals("401", exception.getMessage());
     }

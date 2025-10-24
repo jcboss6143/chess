@@ -1,7 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
@@ -18,6 +18,9 @@ import java.util.Map;
 public class Server {
 
     private final Javalin server;
+    private final CommonServices commonServices;
+    private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         server = Javalin.create(config -> config.staticFiles.add("web"));
@@ -30,6 +33,16 @@ public class Server {
         server.put("game", this::joinGame);
         server.exception(Exception.class, this::exceptionHandler);
         server.error(404, this::notFoundError);
+        try {
+            AuthAccess authAccess = new AuthAccessSQL();
+            GameAccess gameAccess = new GameDataAccess();
+            UserAccess userAccess = new UserAccessSQL();
+            this.commonServices = new CommonServices(authAccess, gameAccess, userAccess);
+            this.userService = new UserService(authAccess, userAccess, commonServices);
+            this.gameService = new GameService(commonServices, gameAccess, authAccess);
+        } catch (Throwable ex) {
+            throw new RuntimeException("Database initialization failed", ex);
+        }
     }
 
 
@@ -87,36 +100,36 @@ public class Server {
 
     private void register(Context ctx) throws ServiceException, DataAccessException  {
         UserData registerData = new Gson().fromJson(ctx.body(), UserData.class);
-        serviceCaller(ctx, registerData, UserService::register);
+        serviceCaller(ctx, registerData, userService::register);
     }
 
     private void login(Context ctx) throws ServiceException, DataAccessException  {
         LoginRequest loginData = new Gson().fromJson(ctx.body(), LoginRequest.class);
-        serviceCaller(ctx, loginData, UserService::login);
+        serviceCaller(ctx, loginData, userService::login);
     }
 
     private void logout(Context ctx) throws ServiceException, DataAccessException  {
-        serviceCaller(ctx, ctx.header("authorization"), UserService::logout);
+        serviceCaller(ctx, ctx.header("authorization"), userService::logout);
     }
 
     private void listGames(Context ctx) throws ServiceException, DataAccessException  {
-        serviceCaller(ctx, ctx.header("authorization"), GameService::listGames);
+        serviceCaller(ctx, ctx.header("authorization"), gameService::listGames);
     }
 
     private void createGame(Context ctx) throws ServiceException, DataAccessException  {
         CreateGameRequest gameName = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
         CreateGameRequest createGameObject = new CreateGameRequest(ctx.header("authorization"), gameName.gameName());
-        serviceCaller(ctx, createGameObject, GameService::createGame);
+        serviceCaller(ctx, createGameObject, gameService::createGame);
     }
 
     private void joinGame(Context ctx) throws ServiceException, DataAccessException  {
         JoinGameRequest gameInfo = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
         JoinGameRequest joinGameObject = new JoinGameRequest(ctx.header("authorization"), gameInfo.playerColor(), gameInfo.gameID());
-        serviceCaller(ctx, joinGameObject, GameService::joinGame);
+        serviceCaller(ctx, joinGameObject, gameService::joinGame);
     }
 
     private void clearApplication(Context ctx) throws DataAccessException {
-        CommonServices.deleteAllData();
+        commonServices.deleteAllData();
         ctx.result("{}");
     }
 
