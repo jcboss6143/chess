@@ -9,6 +9,7 @@ import java.util.Map;
 
 public class GameDataAccess implements GameAccess{
     private final Map<Integer, GameData> GAME_INFO;
+    private Integer nextGameNumber = 1001;
 
     public GameDataAccess() {
         GAME_INFO = new HashMap<>();
@@ -18,8 +19,10 @@ public class GameDataAccess implements GameAccess{
         GAME_INFO.clear();
     }
 
-    public void addGame(GameData newGame) throws DataAccessException {
-        GAME_INFO.put(newGame.gameID(), newGame);
+    public Integer addGame(GameData newGame) throws DataAccessException {
+        nextGameNumber += 1;
+        GAME_INFO.put(nextGameNumber, new GameData(nextGameNumber, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName()));
+        return nextGameNumber;
     }
 
     public GameData getGame(Integer gameID) throws DataAccessException{

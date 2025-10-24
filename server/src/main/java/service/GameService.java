@@ -33,11 +33,9 @@ public class GameService {
     public CreateGameResult createGame(CreateGameRequest makeGameRequest) throws ServiceException, DataAccessException {
         if (makeGameRequest.gameName() == null){ throw new ServiceException("400"); } // can't have empty game name
         commonServices.getAndVerifyAuthData(makeGameRequest.authToken());
-        while (gameAccess.getGame(nextGameNumber) != null) { nextGameNumber += 1; } // makes sure we don't have duplicate gameIDs
-        GameData newGame = new GameData(nextGameNumber, null, null, makeGameRequest.gameName());
-        nextGameNumber += 1;
-        gameAccess.addGame(newGame);
-        return new CreateGameResult(newGame.gameID());
+        GameData newGame = new GameData(0, null, null, makeGameRequest.gameName());
+        int id = gameAccess.addGame(newGame);
+        return new CreateGameResult(id);
     }
 
     public void joinGame(JoinGameRequest joinGameRequest) throws ServiceException, DataAccessException {

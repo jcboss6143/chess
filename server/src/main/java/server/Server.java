@@ -35,7 +35,7 @@ public class Server {
         server.error(404, this::notFoundError);
         try {
             AuthAccess authAccess = new AuthAccessSQL();
-            GameAccess gameAccess = new GameDataAccess();
+            GameAccess gameAccess = new GameAccessSQL();
             UserAccess userAccess = new UserAccessSQL();
             this.commonServices = new CommonServices(authAccess, gameAccess, userAccess);
             this.userService = new UserService(authAccess, userAccess, commonServices);
