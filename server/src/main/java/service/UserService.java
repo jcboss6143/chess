@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import service.model.LoginRequest;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -32,7 +33,7 @@ public class UserService {
         if ((loginRequest.password() == null) || (loginRequest.username() == null)){
             throw new ServiceException("400"); }
         UserData userProfile = userAccess.getUser(loginRequest.username());
-        if ((userProfile == null) || (!Objects.equals(userProfile.password(), loginRequest.password()))) {
+        if ((userProfile == null) || (!BCrypt.checkpw(loginRequest.password(), userProfile.password()))) {
             throw new ServiceException("401"); } // verifies user exists and passwords match
         return createAuthObject(loginRequest.username());
     }

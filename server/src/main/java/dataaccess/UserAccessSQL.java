@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,7 +26,7 @@ public class UserAccessSQL implements  UserAccess, CommonAccessSQL{
         String errorMessage = "Unable to add userData";
         sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
             preparedStatement.setString(1,userData.username());
-            preparedStatement.setString(2,userData.password());
+            preparedStatement.setString(2,BCrypt.hashpw(userData.password(), BCrypt.gensalt()));
             preparedStatement.setString(3,userData.email());
             preparedStatement.executeUpdate();
             return 1;
