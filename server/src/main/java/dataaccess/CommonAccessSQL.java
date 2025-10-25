@@ -8,18 +8,20 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public interface CommonAccessSQL {
 
-    default int executeUpdateCore(PreparedStatement preparedStatement, int filler) throws SQLException {
+    default int executeUpdateCore(PreparedStatement preparedStatement) throws SQLException {
         preparedStatement.executeUpdate();
-        return filler;
+        return 1;
     }
 
     @FunctionalInterface
-    interface AccessMethod<R, T> { R apply(PreparedStatement preparedStatement, T t) throws SQLException; }
+    interface AccessMethod<R> { R apply(PreparedStatement preparedStatement) throws SQLException; }
 
-    default <R, T> R sendStatement(String statement, String errorMessage, AuthAccessSQL.AccessMethod<R, T> accessMethod, T t) throws DataAccessException{
+
+
+    default <R> R sendStatement(String statement, String errorMessage, AuthAccessSQL.AccessMethod<R> accessMethod) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                return accessMethod.apply(preparedStatement, t);
+                return accessMethod.apply(preparedStatement);
             }
         } catch (SQLException ex) {
             throw new DataAccessException(String.format("%s: %s", errorMessage, ex.getMessage()));
