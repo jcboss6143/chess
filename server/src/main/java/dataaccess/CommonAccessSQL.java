@@ -16,8 +16,6 @@ public interface CommonAccessSQL {
     @FunctionalInterface
     interface AccessMethod<R> { R apply(PreparedStatement preparedStatement) throws SQLException; }
 
-
-
     default <R> R sendStatement(String statement, String errorMessage, AuthAccessSQL.AccessMethod<R> accessMethod) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {

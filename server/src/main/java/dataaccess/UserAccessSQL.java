@@ -49,7 +49,6 @@ public class UserAccessSQL implements  UserAccess, CommonAccessSQL{
         });
     }
 
-
     private void buildUserTable() throws DataAccessException{
         DatabaseManager.createDatabase();
         String statement = """
