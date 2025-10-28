@@ -25,8 +25,8 @@ public class AuthAccessSQL implements AuthAccess, CommonAccessSQL{
         String statement = "INSERT INTO authData (username, authToken) VALUES (?, ?)";
         String errorMessage = "Unable to add authData";
         sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
-            preparedStatement.setString(1,authData.username());
-            preparedStatement.setString(2,authData.authToken());
+            preparedStatement.setString(1, authData.username());
+            preparedStatement.setString(2, authData.authToken());
             preparedStatement.executeUpdate();
             return 1;
         });

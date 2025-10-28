@@ -1,5 +1,7 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import model.GameData;
 import model.UserData;
 
@@ -27,12 +29,13 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
 
 
     public Integer addGame(GameData newGame) throws DataAccessException {
-        String statement = "INSERT INTO gameData (whiteUsername, blackUsername, gameName) VALUES (?, ?, ?)";
+        String statement = "INSERT INTO gameData (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         String errorMessage = "Unable to add gameData";
         return sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
             preparedStatement.setString(1, newGame.whiteUsername());
             preparedStatement.setString(2, newGame.blackUsername());
             preparedStatement.setString(3, newGame.gameName());
+            preparedStatement.setString( 4, new Gson().toJson(new ChessGame()));
             preparedStatement.executeUpdate();
             var resultSet = preparedStatement.getGeneratedKeys();
             var ID = 0;
@@ -104,7 +107,8 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
                  id INT NOT NULL AUTO_INCREMENT,
                  whiteUsername varchar(256),
                  blackUsername varchar(256),
-                 gameName varchar(256),
+                 gameName varchar(256) NOT NULL,
+                 game TEXT NOT NULL,
                 PRIMARY KEY (id)  )
             """;
         String errorMessage = "Unable to configure table userData";

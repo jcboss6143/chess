@@ -15,10 +15,10 @@ public class UserServiceTests {
     private final CommonServices commonServices;
     private final UserService userService;
 
-    public UserServiceTests() {
-        AuthAccess authAccess = new AuthDataAccess();
-        GameAccess gameAccess = new GameDataAccess();
-        UserAccess userAccess = new UserDataAccess();
+    public UserServiceTests() throws DataAccessException {
+        AuthAccess authAccess = new AuthAccessSQL();
+        GameAccess gameAccess = new GameAccessSQL();
+        UserAccess userAccess = new UserAccessSQL();
         this.commonServices = new CommonServices(authAccess, gameAccess, userAccess);
         this.userService = new UserService(authAccess, userAccess, commonServices);
     }

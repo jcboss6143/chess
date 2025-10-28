@@ -16,7 +16,7 @@ public class GameService {
     private final GameAccess gameAccess;
     private final AuthAccess authAccess;
 
-    private Integer nextGameNumber = 1001;
+//    private Integer nextGameNumber = 1001;
 
     public GameService(CommonServices commonServices, GameAccess gameAccess, AuthAccess authAccess) {
         this.commonServices = commonServices;
@@ -60,7 +60,7 @@ public class GameService {
         gameAccess.updateGame(updatedGame);
     }
 
-    public void changeNextGameNumber(int newNumber) {
-        nextGameNumber = newNumber;
-    }
+//    public void changeNextGameNumber(int newNumber) {
+//        nextGameNumber = newNumber;
+//    }
 }

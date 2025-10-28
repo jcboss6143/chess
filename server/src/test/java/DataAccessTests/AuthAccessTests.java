@@ -16,7 +16,7 @@ import java.sql.PreparedStatement;
 
 public class AuthAccessTests implements CommonAccessSQL {
 
-    private final AuthAccess authAccess = new AuthAccessSQL();;
+    private final AuthAccess authAccess = new AuthAccessSQL();
 
     public AuthAccessTests() throws DataAccessException {
 
@@ -57,10 +57,13 @@ public class AuthAccessTests implements CommonAccessSQL {
     }
 
     @Test
-    @DisplayName("fetch bad user")
+    @DisplayName("try adding bad authData")
     public void GetUserFail() throws DataAccessException {
         authAccess.clear();
-        Assertions.assertNull(authAccess.getAuthData("BadAuthToken"));
+        DataAccessException exception = Assertions.assertThrows(DataAccessException.class, () -> {
+            authAccess.addAuthData(new AuthData(null, null));
+        });
+        Assertions.assertEquals("Unable to add authData: Column 'username' cannot be null", exception.getMessage());
     }
 
 
@@ -81,6 +84,7 @@ public class AuthAccessTests implements CommonAccessSQL {
         authAccess.clear();
         authAccess.addAuthData(new AuthData("TestToken", "Joe"));
         Assertions.assertNull(authAccess.getAuthData("BadTestToken"));
+        Assertions.assertNull(authAccess.getAuthData(null));
     }
 
 

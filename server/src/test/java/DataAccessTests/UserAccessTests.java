@@ -8,11 +8,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
+import service.ServiceException;
 import service.model.CreateGameRequest;
 import service.model.JoinGameRequest;
 import service.model.ListGamesResult;
+import service.model.LoginRequest;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class UserAccessTests implements CommonAccessSQL {
 
@@ -26,7 +29,7 @@ public class UserAccessTests implements CommonAccessSQL {
     @DisplayName("successfully clears board")
     public void clearSuccess() throws DataAccessException {
         userAccess.clear();
-        String statement = "SELECT * from gameData";
+        String statement = "SELECT * from userData";
         String errorMessage = "Failed";
         boolean tableCleared = sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
             try (var rs = preparedStatement.executeQuery()) {
@@ -42,7 +45,7 @@ public class UserAccessTests implements CommonAccessSQL {
     public void createUserSuccess() throws DataAccessException {
         userAccess.clear();
         userAccess.addUser(new UserData("joe", "password", "joe@email.com"));
-        String statement = "SELECT * from gameData WHERE username=?";
+        String statement = "SELECT * from userData WHERE username=?";
         String errorMessage = "Failed";
         boolean correctOutput = sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
             preparedStatement.setString(1, "joe");
@@ -57,6 +60,17 @@ public class UserAccessTests implements CommonAccessSQL {
             }
         });
         Assertions.assertTrue(correctOutput);
+    }
+
+
+    @Test
+    @DisplayName("create new user with bad data")
+    public void createUserFail() throws DataAccessException {
+        userAccess.clear();
+        DataAccessException exception = Assertions.assertThrows(DataAccessException.class, () -> {
+            userAccess.addUser(new UserData(null, null, null));
+        });
+        Assertions.assertEquals("Unable to add userData: Column 'username' cannot be null", exception.getMessage());
     }
 
 
@@ -77,6 +91,7 @@ public class UserAccessTests implements CommonAccessSQL {
     public void getUserFail() throws DataAccessException {
         userAccess.clear();
         userAccess.addUser(new UserData("joe", "password", "joe@email.com"));
+        userAccess.clear();
         Assertions.assertNull(userAccess.getUser("joey"));
     }
 }
