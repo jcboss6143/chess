@@ -3,13 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
-import model.UserData;
-
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -38,11 +32,11 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
             preparedStatement.setString( 4, new Gson().toJson(new ChessGame()));
             preparedStatement.executeUpdate();
             var resultSet = preparedStatement.getGeneratedKeys();
-            var ID = 0;
+            var id = 0;
             if (resultSet.next()) {
-                ID = resultSet.getInt(1);
+                id = resultSet.getInt(1);
             }
-            return ID;
+            return id;
         });
     }
 

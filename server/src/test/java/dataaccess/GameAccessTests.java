@@ -115,7 +115,7 @@ public class GameAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("update game data success")
-    public void UpdateGameSuccess() throws DataAccessException {
+    public void updateGameSuccess() throws DataAccessException {
         gameAccess.clear();
         int gameID = gameAccess.addGame(new GameData(1, null, null, "new_Game"));
         gameAccess.updateGame(new GameData(gameID, "WhiteUser", "BlackUser", "new_Game"));
@@ -128,7 +128,7 @@ public class GameAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("bad update game data")
-    public void UpdateGameFail() throws DataAccessException {
+    public void updateGameFail() throws DataAccessException {
         gameAccess.clear();
         int gameID = gameAccess.addGame(new GameData(1, null, null, "new_Game"));
         gameAccess.updateGame(new GameData(4, "WhiteUser", "BlackUser", null));
