@@ -1,12 +1,10 @@
 package DataAccessTests;
 
 import dataaccess.*;
-import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.sql.PreparedStatement;
 import java.util.Collection;
 
@@ -15,11 +13,10 @@ public class GameAccessTests implements CommonAccessSQL {
     private final GameAccess gameAccess = new GameAccessSQL();
 
     public GameAccessTests() throws DataAccessException {
-
     }
 
     @Test
-    @DisplayName("create new game")
+    @DisplayName("clear game")
     public void clearSuccess() throws DataAccessException {
         gameAccess.clear();
         String statement = "SELECT * from gameData";
@@ -34,14 +31,14 @@ public class GameAccessTests implements CommonAccessSQL {
 
 
     @Test
-    @DisplayName("gets valid game data")
+    @DisplayName("creates valid Game")
     public void createGameSuccess() throws DataAccessException {
         gameAccess.clear();
         int gameID = gameAccess.addGame(new GameData(1, null, null, "new_Game"));
-        GameData returnedResult = gameAccess.getGame(gameID);
-        String statement = "SELECT * from gameData WHERE gameID=" + gameID;
+        String statement = "SELECT * from gameData WHERE id=?";
         String errorMessage = "Failed";
         boolean correctOutput = sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
+            preparedStatement.setInt(1, gameID);
             try (var rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
                     Assertions.assertNull(rs.getString("whiteUsername"));
@@ -55,9 +52,10 @@ public class GameAccessTests implements CommonAccessSQL {
         Assertions.assertTrue(correctOutput);
     }
 
+
     @Test
     @DisplayName("fetch bad game")
-    public void GetUserFail() throws DataAccessException {
+    public void GetGameFail() throws DataAccessException {
         gameAccess.clear();
         Assertions.assertNull(gameAccess.getGame(0));
     }
@@ -76,19 +74,65 @@ public class GameAccessTests implements CommonAccessSQL {
 
 
     @Test
-    @DisplayName("gets valid game data")
+    @DisplayName("gets invalid game data")
+    public void GetGameDataFail() throws DataAccessException {
+        gameAccess.clear();
+        int gameID = gameAccess.addGame(new GameData(3, null, null, "new_Game"));
+        Assertions.assertNull(gameAccess.getGame(5));
+    }
+
+
+    @Test
+    @DisplayName("gets valid game data list")
     public void ListGameSuccess() throws DataAccessException {
         gameAccess.clear();
         int gameID1 = gameAccess.addGame(new GameData(1, null, null, "new_Game1"));
-        int gameID2 = gameAccess.addGame(new GameData(1, "joe", null, "new_Game2"));
-        int gameID3 = gameAccess.addGame(new GameData(1, null, "jack", "new_Game3"));
+        int gameID2 = gameAccess.addGame(new GameData(1, null, null, "new_Game2"));
+        int gameID3 = gameAccess.addGame(new GameData(1, null, null, "new_Game3"));
         Collection<GameData> returnedResult = gameAccess.listGames();
-//        for ()
-//        Assertions.assertNull(returnedResult.blackUsername());
-//        Assertions.assertNull(returnedResult.whiteUsername());
-//        Assertions.assertEquals("new_Game", returnedResult.gameName());
-//        Assertions.assertNull(returnedResult.blackUsername());
-//        Assertions.assertNull(returnedResult.whiteUsername());
-//        Assertions.assertEquals("new_Game", returnedResult.iterator().next().gameName());
+        int i = 1;
+        for (GameData game : returnedResult) {
+            Assertions.assertNull(game.blackUsername());
+            Assertions.assertNull(game.whiteUsername());
+            Assertions.assertEquals("new_Game" + i, game.gameName());
+            i += 1;
+        }
     }
+
+
+    @Test
+    @DisplayName("list games when there are none")
+    public void ListGameFail() throws DataAccessException {
+        gameAccess.clear();
+        Collection<GameData> returnedResult = gameAccess.listGames();
+        Assertions.assertEquals(0, returnedResult.size());
+    }
+
+
+    @Test
+    @DisplayName("update game data success")
+    public void UpdateGameSuccess() throws DataAccessException {
+        gameAccess.clear();
+        int gameID = gameAccess.addGame(new GameData(1, null, null, "new_Game"));
+        gameAccess.updateGame(new GameData(gameID, "WhiteUser", "BlackUser", "new_Game"));
+        GameData returnedResult = gameAccess.getGame(gameID);
+        Assertions.assertEquals("WhiteUser", returnedResult.whiteUsername());
+        Assertions.assertEquals("BlackUser", returnedResult.blackUsername());
+        Assertions.assertEquals("new_Game", returnedResult.gameName());
+    }
+
+
+    @Test
+    @DisplayName("bad update game data")
+    public void UpdateGameFail() throws DataAccessException {
+        gameAccess.clear();
+        int gameID = gameAccess.addGame(new GameData(1, null, null, "new_Game"));
+        gameAccess.updateGame(new GameData(4, "WhiteUser", "BlackUser", "new_Game"));
+        GameData returnedResult = gameAccess.getGame(gameID);
+        Assertions.assertNull(returnedResult.blackUsername());
+        Assertions.assertNull(returnedResult.whiteUsername());
+        Assertions.assertEquals("new_Game", returnedResult.gameName());
+    }
+
+
 }
