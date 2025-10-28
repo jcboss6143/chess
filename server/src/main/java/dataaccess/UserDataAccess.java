@@ -6,21 +6,21 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class UserDataAccess implements UserAccess{
-    private final Map<String, UserData> USER_INFO;
+    private final Map<String, UserData> userInfo;
 
     public UserDataAccess() {
-        USER_INFO = new HashMap<>();
+        userInfo = new HashMap<>();
     }
 
     public void clear() throws DataAccessException {
-        USER_INFO.clear();
+        userInfo.clear();
     }
 
     public void addUser(UserData userData) throws DataAccessException {
-        USER_INFO.put(userData.username(), userData);
+        userInfo.put(userData.username(), userData);
     }
 
     public UserData getUser(String username) throws DataAccessException {
-        return USER_INFO.get(username);
+        return userInfo.get(username);
     }
 }

@@ -60,7 +60,4 @@ public class GameService {
         gameAccess.updateGame(updatedGame);
     }
 
-//    public void changeNextGameNumber(int newNumber) {
-//        nextGameNumber = newNumber;
-//    }
 }

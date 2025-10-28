@@ -5,33 +5,33 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class AuthDataAccess implements  AuthAccess{
-    private final Map<String, AuthData> AUTH_INFO = new HashMap<>();
-    private final Map<String, String> ASSIGNED_TOKENS = new HashMap<>();
+    private final Map<String, AuthData> authInfo = new HashMap<>();
+    private final Map<String, String> assignedTokens = new HashMap<>();
 
     public AuthDataAccess() {
 
     }
 
     public void clear() throws DataAccessException{
-        AUTH_INFO.clear();
-        ASSIGNED_TOKENS.clear();
+        authInfo.clear();
+        assignedTokens.clear();
     }
 
     public void addAuthData(AuthData authData) throws DataAccessException {
-        AUTH_INFO.put(authData.authToken(), authData);
-        ASSIGNED_TOKENS.put(authData.username(), authData.authToken());
+        authInfo.put(authData.authToken(), authData);
+        assignedTokens.put(authData.username(), authData.authToken());
     }
 
     public AuthData getAuthData(String authToken) throws DataAccessException{
-        return AUTH_INFO.get(authToken);
+        return authInfo.get(authToken);
     }
 
     public String getAuthToken(String authToken) throws DataAccessException{
-        return ASSIGNED_TOKENS.get(authToken);
+        return assignedTokens.get(authToken);
     }
 
     public void deleteAuth(AuthData authData) throws DataAccessException{
-        AUTH_INFO.remove(authData.authToken());
-        ASSIGNED_TOKENS.remove(authData.username());
+        authInfo.remove(authData.authToken());
+        assignedTokens.remove(authData.username());
     }
 }

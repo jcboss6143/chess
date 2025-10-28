@@ -1,15 +1,12 @@
-package DataAccessTests;
+package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import dataaccess.*;
 import model.GameData;
-import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collection;
 
 public class GameAccessTests implements CommonAccessSQL {
@@ -60,7 +57,7 @@ public class GameAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("create bad game")
-    public void CreateGameFail() throws DataAccessException {
+    public void createGameFail() throws DataAccessException {
         DataAccessException exception = Assertions.assertThrows(DataAccessException.class, () -> {
             gameAccess.addGame(new GameData(1, null, null, null));
         });
@@ -70,7 +67,7 @@ public class GameAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("gets valid game data")
-    public void GetGameDataSuccess() throws DataAccessException {
+    public void getGameDataSuccess() throws DataAccessException {
         gameAccess.clear();
         int gameID = gameAccess.addGame(new GameData(1, null, null, "new_Game"));
         GameData returnedResult = gameAccess.getGame(gameID);
@@ -82,7 +79,7 @@ public class GameAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("gets invalid game data")
-    public void GetGameDataFail() throws DataAccessException {
+    public void getGameDataFail() throws DataAccessException {
         gameAccess.clear();
         int gameID = gameAccess.addGame(new GameData(3, null, null, "new_Game"));
         Assertions.assertNull(gameAccess.getGame(5));
@@ -91,7 +88,7 @@ public class GameAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("gets valid game data list")
-    public void ListGameSuccess() throws DataAccessException {
+    public void listGameSuccess() throws DataAccessException {
         gameAccess.clear();
         int gameID1 = gameAccess.addGame(new GameData(1, null, null, "new_Game1"));
         int gameID2 = gameAccess.addGame(new GameData(1, null, null, "new_Game2"));
@@ -109,7 +106,7 @@ public class GameAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("list games when there are none")
-    public void ListGameFail() throws DataAccessException {
+    public void lstGameFail() throws DataAccessException {
         gameAccess.clear();
         Collection<GameData> returnedResult = gameAccess.listGames();
         Assertions.assertEquals(0, returnedResult.size());

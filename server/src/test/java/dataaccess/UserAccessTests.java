@@ -1,21 +1,12 @@
-package DataAccessTests;
+package dataaccess;
 
-import dataaccess.*;
-import model.AuthData;
-import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
-import service.ServiceException;
-import service.model.CreateGameRequest;
-import service.model.JoinGameRequest;
-import service.model.ListGamesResult;
-import service.model.LoginRequest;
 
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class UserAccessTests implements CommonAccessSQL {
 

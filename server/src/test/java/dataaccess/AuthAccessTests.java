@@ -1,16 +1,9 @@
-package DataAccessTests;
+package dataaccess;
 
-import dataaccess.*;
 import model.AuthData;
-import model.GameData;
-import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import service.ServiceException;
-import service.model.CreateGameRequest;
-import service.model.JoinGameRequest;
-import service.model.ListGamesResult;
 
 import java.sql.PreparedStatement;
 
@@ -38,7 +31,7 @@ public class AuthAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("create new user and fetch it")
-    public void AddUserSuccess() throws DataAccessException {
+    public void addUserSuccess() throws DataAccessException {
         authAccess.clear();
         authAccess.addAuthData(new AuthData("TestToken", "Joe"));
         String statement = "SELECT * from authData WHERE authToken='TestToken'";
@@ -58,7 +51,7 @@ public class AuthAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("try adding bad authData")
-    public void GetUserFail() throws DataAccessException {
+    public void getUserFail() throws DataAccessException {
         authAccess.clear();
         DataAccessException exception = Assertions.assertThrows(DataAccessException.class, () -> {
             authAccess.addAuthData(new AuthData(null, null));
@@ -69,7 +62,7 @@ public class AuthAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("gets valid auth data")
-    public void GetAuthDataSuccess() throws DataAccessException {
+    public void getAuthDataSuccess() throws DataAccessException {
         authAccess.clear();
         authAccess.addAuthData(new AuthData("TestToken", "Joe"));
         AuthData returnedResult = authAccess.getAuthData("TestToken");
@@ -80,7 +73,7 @@ public class AuthAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("fails to get auth data")
-    public void GetAuthDataFail() throws DataAccessException {
+    public void getAuthDataFail() throws DataAccessException {
         authAccess.clear();
         authAccess.addAuthData(new AuthData("TestToken", "Joe"));
         Assertions.assertNull(authAccess.getAuthData("BadTestToken"));
@@ -90,7 +83,7 @@ public class AuthAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("fails to get auth data")
-    public void DeleteAuthSuccess() throws DataAccessException {
+    public void deleteAuthSuccess() throws DataAccessException {
         authAccess.clear();
         authAccess.addAuthData(new AuthData("TestToken", "Joe"));
         authAccess.deleteAuth(new AuthData("TestToken", "Joe"));
@@ -99,7 +92,7 @@ public class AuthAccessTests implements CommonAccessSQL {
 
     @Test
     @DisplayName("fails to get auth data")
-    public void DeleteAuthFail() throws DataAccessException {
+    public void deleteAuthFail() throws DataAccessException {
         authAccess.clear();
         authAccess.addAuthData(new AuthData("TestToken", "Joe"));
         authAccess.deleteAuth(new AuthData("BadTestToken", "Joe"));
