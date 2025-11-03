@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.GameData;
 import service.model.CreateGameRequest;
@@ -33,7 +34,7 @@ public class GameService {
     public CreateGameResult createGame(CreateGameRequest makeGameRequest) throws ServiceException, DataAccessException {
         if (makeGameRequest.gameName() == null){ throw new ServiceException("400"); } // can't have empty game name
         commonServices.getAndVerifyAuthData(makeGameRequest.authToken());
-        GameData newGame = new GameData(0, null, null, makeGameRequest.gameName());
+        GameData newGame = new GameData(0, null, null, makeGameRequest.gameName(), new ChessGame());
         int id = gameAccess.addGame(newGame);
         return new CreateGameResult(id);
     }
@@ -56,7 +57,7 @@ public class GameService {
     private void updateGame(GameData gameToJoin, String playerSeat, String whiteSeat, String blackSeat)
             throws ServiceException, DataAccessException {
         if (playerSeat != null) { throw new ServiceException("403"); } // the seat the player wanted to take is already taken
-        GameData updatedGame = new GameData(gameToJoin.gameID(), whiteSeat, blackSeat, gameToJoin.gameName());
+        GameData updatedGame = new GameData(gameToJoin.gameID(), whiteSeat, blackSeat, gameToJoin.gameName(), gameToJoin.game());
         gameAccess.updateGame(updatedGame);
     }
 

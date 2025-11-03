@@ -29,7 +29,7 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
             preparedStatement.setString(1, newGame.whiteUsername());
             preparedStatement.setString(2, newGame.blackUsername());
             preparedStatement.setString(3, newGame.gameName());
-            preparedStatement.setString( 4, new Gson().toJson(new ChessGame()));
+            preparedStatement.setString( 4, new Gson().toJson(newGame.game()));
             preparedStatement.executeUpdate();
             var resultSet = preparedStatement.getGeneratedKeys();
             var id = 0;
@@ -43,7 +43,7 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
 
 
     public GameData getGame(Integer gameID) throws DataAccessException{
-        String statement = "SELECT whiteUsername, blackUsername, gameName FROM gameData WHERE id=?";
+        String statement = "SELECT whiteUsername, blackUsername, gameName, game FROM gameData WHERE id=?";
         String errorMessage = "Unable to fetch gameData";
         return sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
             preparedStatement.setInt(1, gameID);
@@ -52,7 +52,8 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
                     String whiteUsername = rs.getString("whiteUsername");
                     String blackUsername = rs.getString("blackUsername");
                     String gameName = rs.getString("gameName");
-                    return new GameData(gameID, whiteUsername, blackUsername, gameName);
+                    ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+                    return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
                 }
                 return null;
             }
@@ -64,7 +65,7 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
 
 
     public Collection<GameData> listGames() throws DataAccessException{
-        String statement = "SELECT id, whiteUsername, blackUsername, gameName FROM gameData";
+        String statement = "SELECT id, whiteUsername, blackUsername, gameName, game FROM gameData";
         String errorMessage = "Unable to fetch gameData";
         return sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
             try (var rs = preparedStatement.executeQuery()) {
@@ -74,7 +75,8 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
                     String whiteUsername = rs.getString("whiteUsername");
                     String blackUsername = rs.getString("blackUsername");
                     String gameName = rs.getString("gameName");
-                    gameSet.add(new GameData(gameID, whiteUsername, blackUsername, gameName));
+                    ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+                    gameSet.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
                 }
                 return gameSet;
             }
@@ -83,12 +85,13 @@ public class GameAccessSQL implements GameAccess, CommonAccessSQL{
 
 
     public void updateGame(GameData game) throws DataAccessException{
-        String statement = "UPDATE gameData SET whiteUsername=?, blackUsername=? WHERE id=?";
+        String statement = "UPDATE gameData SET whiteUsername=?, blackUsername=?, game=? WHERE id=?";
         String errorMessage = "Unable to fetch gameData";
         sendStatement(statement, errorMessage, (PreparedStatement preparedStatement) -> {
             preparedStatement.setString(1, game.whiteUsername());
             preparedStatement.setString(2, game.blackUsername());
-            preparedStatement.setInt(3, game.gameID());
+            preparedStatement.setString(3, new Gson().toJson(game.game()));
+            preparedStatement.setInt(4, game.gameID());
             preparedStatement.executeUpdate();
             return 1;
         });
