@@ -4,12 +4,13 @@ import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 
+
 public class UniversalState {
     String displayName;
     boolean continueLoop;
 
     public UniversalState() {
-        displayName = "default";
+        displayName = "[LOGGED_OUT]";
         continueLoop = true;
     }
 
@@ -33,7 +34,7 @@ public class UniversalState {
     }
 
 
-    String evaluateCommand(String input, String[] params) {
+    String evaluateCommand(String cmd, String[] params) {
         return "Command Not Implemented";
     }
 }
