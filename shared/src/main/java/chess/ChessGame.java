@@ -109,6 +109,12 @@ public class ChessGame {
     }
 
 
+    public ChessPiece getPiece(int x, int y) {
+        ChessPosition position = new ChessPosition(x, y);
+        return board.getPiece(position);
+    }
+
+
     /**
      * Makes a move that is known to be possible (this move may not be a valid move)
      * =========================================================================================================
@@ -146,6 +152,7 @@ public class ChessGame {
 
 
 
+
     // =============== Finding Pieces on Board =============== //
 
 
@@ -154,7 +161,7 @@ public class ChessGame {
      *
      * @param teamColor finds all locations of pieces that are of this color.
      */
-    private Collection<ChessPosition> getPieceLocations(TeamColor teamColor) {
+    public Collection<ChessPosition> getPieceLocations(TeamColor teamColor) {
         HashSet<ChessPosition> teamPieces = new HashSet<>();
         for (int x = 1; x <= 8; x++) {
             for (int y = 1; y <= 8; y++) {  // looping through the board
