@@ -30,7 +30,7 @@ public class PreLoginState extends UniversalState {
     private String register(String[] params) throws URISyntaxException, IOException, InterruptedException {
         if (params.length != 3) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
         UserData accountInfo = new UserData(params[0], params[1], params[2]);
-        String result = requestHandler.makeRequest("POST", "/user", accountInfo);
+        String result = requestHandler.makeRequest("POST", "/user", accountInfo, null);
         AuthData authData = new Gson().fromJson(result, AuthData.class);
         System.out.println(RESET_TEXT_COLOR + "Successfully registered as " + authData.username());
         // logging the user in. Because we are going to the PostLoginState, we will only return once we are logged out
@@ -40,7 +40,7 @@ public class PreLoginState extends UniversalState {
     private String login(String[] params) throws URISyntaxException, IOException, InterruptedException {
         if (params.length != 2) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
         LoginRequest loginRequest = new LoginRequest(params[0], params[1]);
-        String result = requestHandler.makeRequest("POST", "/session", loginRequest);
+        String result = requestHandler.makeRequest("POST", "/session", loginRequest, null);
         AuthData authData = new Gson().fromJson(result, AuthData.class);
         return logUserIn(authData);
     }

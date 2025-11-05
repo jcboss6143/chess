@@ -16,11 +16,16 @@ public class WebRequests {
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private final String serverURL;
     private final int port;
+    private String authToken;
 
     public WebRequests(String url, int webPort) {
         serverURL = url;
         port = webPort;
+        authToken = null;
     }
+
+    public void updateAuthToken(String auth) { authToken = auth; }
+    public void clearAuthToken() { authToken = null; }
 
     public String makeRequest(String method, String path, Object body) throws URISyntaxException, IOException, InterruptedException {
         HttpRequest request = makeHttpRequest(method, path, body);
@@ -33,7 +38,7 @@ public class WebRequests {
         }
     }
 
-    public HttpRequest makeHttpRequest(String method, String path, Object body) throws URISyntaxException {
+    private HttpRequest makeHttpRequest(String method, String path, Object body) throws URISyntaxException {
         String targetURL = String.format(Locale.getDefault(), "http://%s:%d%s", serverURL, port, path);
         var request = HttpRequest.newBuilder().uri(new URI(targetURL))
                 .timeout(java.time.Duration.ofMillis(10000)); // will timeout after 10 seconds
@@ -42,6 +47,9 @@ public class WebRequests {
                     .setHeader("Content-Type", "application/json");
         } else {
             request.method(method, HttpRequest.BodyPublishers.noBody());
+        }
+        if (authToken != null) {
+            request.setHeader("authorization", authToken);
         }
         return request.build();
     }
