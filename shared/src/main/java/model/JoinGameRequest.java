@@ -1,6 +1,4 @@
-package service.model;
-
-import chess.ChessGame;
+package model;
 
 public record JoinGameRequest(String authToken, String playerColor, int gameID) {
 }

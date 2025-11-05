@@ -1,10 +1,23 @@
+import Requests.WebRequests;
+import Requests.BadResponseExeption;
+import com.google.gson.Gson;
+import model.*;
+import chess.ChessGame;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import static ui.EscapeSequences.*;
+
+
 public class PreLoginState extends UniversalState {
 
-    public PreLoginState() {
+    public PreLoginState(WebRequests webRequests) {
+        super(webRequests);
     }
 
     @Override
-    String evaluateCommand(String cmd, String[] params) {
+    String evaluateCommand(String cmd, String[] params) throws URISyntaxException, IOException, InterruptedException {
         return switch (cmd) {
             case "register" -> register(params);
             case "login" -> login(params);
@@ -14,12 +27,19 @@ public class PreLoginState extends UniversalState {
         };
     }
 
-    private String register(String[] params) {
-        return "implement";
+    private String register(String[] params) throws URISyntaxException, IOException, InterruptedException {
+        if (params.length != 3) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
+        UserData accountInfo = new UserData(params[0], params[1], params[2]);
+        String result = requestHandler.makeRequest("POST", "/user", accountInfo);
+        AuthData authData = new Gson().fromJson(result, AuthData.class);
+        System.out.println(RESET_TEXT_COLOR + "Successfully registered as " + authData.username());
+        // logging the user in. Because we are going to the PostLoginState, we will only return once we are logged out
+        return logUserIn(authData);
     }
 
     private String login(String[] params) {
-        // login and call PostLoginState
+        if (params.length != 2) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
+        LoginRequest loginRequest = new LoginRequest(params[0], params[1]);
         return "implement";
     }
 
@@ -35,6 +55,13 @@ public class PreLoginState extends UniversalState {
                 quit - go back to your shell
                 help - list possible commands
                 """;
+    }
+
+
+    private String logUserIn(AuthData authData) {
+        System.out.println(RESET_TEXT_COLOR + "logging in...");
+        new PostLoginState(authData.username(), authData.authToken(), requestHandler).mainLoop(); // will continue in the main loop until user logs out
+        return  "logged out successfully";
     }
 
 }

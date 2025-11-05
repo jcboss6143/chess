@@ -3,10 +3,10 @@ package service;
 import chess.ChessGame;
 import dataaccess.*;
 import model.GameData;
-import service.model.CreateGameRequest;
-import service.model.CreateGameResult;
-import service.model.JoinGameRequest;
-import service.model.ListGamesResult;
+import model.CreateGameRequest;
+import model.CreateGameResult;
+import model.JoinGameRequest;
+import model.ListGamesResult;
 
 import java.util.Collection;
 import java.util.Objects;

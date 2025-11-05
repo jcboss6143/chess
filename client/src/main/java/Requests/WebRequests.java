@@ -1,7 +1,10 @@
 package Requests;
 
 import com.google.gson.Gson;
+import model.*;
+import model.ErrorMessage;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -14,9 +17,20 @@ public class WebRequests {
     private final String serverURL;
     private final int port;
 
-    public WebRequests(String url, int webPort) throws Exception {
+    public WebRequests(String url, int webPort) {
         serverURL = url;
         port = webPort;
+    }
+
+    public String makeRequest(String method, String path, Object body) throws URISyntaxException, IOException, InterruptedException {
+        HttpRequest request = makeHttpRequest(method, path, body);
+        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (httpResponse.statusCode() >= 200 && httpResponse.statusCode() < 300) {
+            return httpResponse.body();
+        } else {
+            ErrorMessage message = new Gson().fromJson(httpResponse.body(), ErrorMessage.class);
+            throw new BadResponseExeption(message.message());
+        }
     }
 
     public HttpRequest makeHttpRequest(String method, String path, Object body) throws URISyntaxException {
@@ -32,13 +46,8 @@ public class WebRequests {
         return request.build();
     }
 
-    private HttpResponse<String> sendHttpRequest(HttpRequest request) throws BadResponseExeption {
-        try {
-            return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception ex) {
-            throw new BadResponseExeption(ex.getMessage());
-        }
-    }
+
+
 
 
 }

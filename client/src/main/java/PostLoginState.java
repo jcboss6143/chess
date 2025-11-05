@@ -1,7 +1,10 @@
+import Requests.WebRequests;
+
 public class PostLoginState extends UniversalState {
     String authToken;
 
-    public PostLoginState(String userName, String token) {
+    public PostLoginState(String userName, String token, WebRequests webRequests) {
+        super(webRequests);
         displayName = userName;
         authToken = token;
     }

@@ -9,9 +9,9 @@ import service.CommonServices;
 import service.GameService;
 import service.ServiceException;
 import service.UserService;
-import service.model.CreateGameRequest;
-import service.model.JoinGameRequest;
-import service.model.LoginRequest;
+import model.CreateGameRequest;
+import model.JoinGameRequest;
+import model.LoginRequest;
 import java.util.Map;
 
 

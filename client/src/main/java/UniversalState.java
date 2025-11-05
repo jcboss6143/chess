@@ -1,5 +1,12 @@
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Scanner;
+import Requests.WebRequests;
+import model.GameData;
+import model.AuthData;
+import model.UserData;
+import chess.ChessGame;
 
 import static ui.EscapeSequences.*;
 
@@ -8,8 +15,10 @@ import static ui.EscapeSequences.*;
 public class UniversalState {
     String displayName;
     boolean continueLoop;
+    WebRequests requestHandler;
 
-    public UniversalState() {
+    public UniversalState(WebRequests webRequests) {
+        requestHandler = webRequests;
         displayName = "[LOGGED_OUT]";
         continueLoop = true;
     }
@@ -26,7 +35,7 @@ public class UniversalState {
         System.out.println();
     }
 
-    String tokenizeCommand(String input) {
+    String tokenizeCommand(String input) throws URISyntaxException, IOException, InterruptedException {
         String[] tokens = input.toLowerCase().split(" ");
         String cmd = (tokens.length > 0) ? tokens[0] : "help";
         String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
@@ -34,7 +43,7 @@ public class UniversalState {
     }
 
 
-    String evaluateCommand(String cmd, String[] params) {
+    String evaluateCommand(String cmd, String[] params) throws URISyntaxException, IOException, InterruptedException {
         return "Command Not Implemented";
     }
 }

@@ -4,10 +4,9 @@ import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
-import service.model.LoginRequest;
+import model.LoginRequest;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Objects;
 
 public class UserService {
     private final AuthAccess authAccess;
