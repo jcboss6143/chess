@@ -37,10 +37,12 @@ public class PreLoginState extends UniversalState {
         return logUserIn(authData);
     }
 
-    private String login(String[] params) {
+    private String login(String[] params) throws URISyntaxException, IOException, InterruptedException {
         if (params.length != 2) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
         LoginRequest loginRequest = new LoginRequest(params[0], params[1]);
-        return "implement";
+        String result = requestHandler.makeRequest("POST", "/session", loginRequest);
+        AuthData authData = new Gson().fromJson(result, AuthData.class);
+        return logUserIn(authData);
     }
 
     private String quit() {
