@@ -21,9 +21,9 @@ public class ServerFacadeTests {
     @BeforeAll
     public static void init() throws URISyntaxException, IOException, InterruptedException {
         server = new Server();
-        var port = server.run(8080);
+        var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        serverFacade = new ServerFacade("localhost", 8080);
+        serverFacade = new ServerFacade("localhost", port);
         serverFacade.makeRequest("DELETE", "/db", null); // clears server
         UserData accountInfo = new UserData("Joe", "Joe", "Joe");
         String result = serverFacade.makeRequest("POST", "/user", accountInfo);
