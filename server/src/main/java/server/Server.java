@@ -9,8 +9,8 @@ import service.CommonServices;
 import service.GameService;
 import service.ServiceException;
 import service.UserService;
-import model.ServerCreateGameRequest;
-import model.ServerJoinGameRequest;
+import model.CreateGameRequestS;
+import model.JoinGameRequestS;
 import model.LoginRequest;
 import java.util.Map;
 
@@ -120,15 +120,15 @@ public class Server {
 
     private void createGame(Context ctx) throws ServiceException, DataAccessException  {
         if (ctx.body().isEmpty()) { throw new ServiceException("400"); }
-        ServerCreateGameRequest gameName = new Gson().fromJson(ctx.body(), ServerCreateGameRequest.class);
-        ServerCreateGameRequest createGameObject = new ServerCreateGameRequest(ctx.header("authorization"), gameName.gameName());
+        CreateGameRequestS gameName = new Gson().fromJson(ctx.body(), CreateGameRequestS.class);
+        CreateGameRequestS createGameObject = new CreateGameRequestS(ctx.header("authorization"), gameName.gameName());
         serviceCaller(ctx, createGameObject, gameService::createGame);
     }
 
     private void joinGame(Context ctx) throws ServiceException, DataAccessException  {
         if (ctx.body().isEmpty()) { throw new ServiceException("400"); }
-        ServerJoinGameRequest gameInfo = new Gson().fromJson(ctx.body(), ServerJoinGameRequest.class);
-        ServerJoinGameRequest joinGameObject = new ServerJoinGameRequest(ctx.header("authorization"), gameInfo.playerColor(), gameInfo.gameID());
+        JoinGameRequestS gameInfo = new Gson().fromJson(ctx.body(), JoinGameRequestS.class);
+        JoinGameRequestS joinGameObject = new JoinGameRequestS(ctx.header("authorization"), gameInfo.playerColor(), gameInfo.gameID());
         serviceCaller(ctx, joinGameObject, gameService::joinGame);
     }
 

@@ -1,4 +1,4 @@
-package ui.terminalStates;
+package ui.terminalstates;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -31,7 +31,8 @@ public abstract class State {
             System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
             try { result = RESET_TEXT_COLOR + tokenizeCommand(scanner.nextLine().trim()); }
             catch (BadResponseExeption e) {
-                if (e.getMessage().startsWith("400")) { result =  SET_TEXT_COLOR_YELLOW + "ERROR: a bad request was made to the server, please try again."; }
+                if (e.getMessage().startsWith("400")) {
+                    result =  SET_TEXT_COLOR_YELLOW + "ERROR: a bad request was made to the server, please try again."; }
                 else { result = SET_TEXT_COLOR_RED + e.toString(); }
             }
             catch (ConnectException e) {  result = SET_TEXT_COLOR_YELLOW + "Unable to connect to the server. Please try again later.";}

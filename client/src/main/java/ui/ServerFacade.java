@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.Locale;
 
 public class ServerFacade {
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
     private final String serverURL;
     private final int port;
     private String authToken;

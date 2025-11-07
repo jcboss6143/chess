@@ -1,4 +1,4 @@
-package ui.terminalStates;
+package ui.terminalstates;
 
 import ui.ServerFacade;
 import ui.BadResponseExeption;
@@ -73,7 +73,8 @@ public class PreLoginState extends State {
 
     private String logUserIn(AuthData authData) {
         System.out.println(RESET_TEXT_COLOR + "logging in...");
-        new PostLoginState(authData.username(), authData.authToken(), requestHandler).mainLoop(); // will continue in the main loop until user logs out
+        // will continue in the main loop until user logs out
+        new PostLoginState(authData.username(), authData.authToken(), requestHandler).mainLoop();
         return  "logged out successfully";
     }
 

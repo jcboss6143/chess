@@ -7,9 +7,9 @@ import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import model.ServerCreateGameRequest;
+import model.CreateGameRequestS;
 import model.CreateGameResult;
-import model.ServerJoinGameRequest;
+import model.JoinGameRequestS;
 import model.ListGamesResult;
 
 
@@ -47,13 +47,13 @@ public class GameServiceTests {
 
     public void createTestGames() throws ServiceException, DataAccessException {
         commonServices.deleteGameData();
-        this.game1 = gameService.createGame(new ServerCreateGameRequest(testUser1AuthData.authToken(), "Test_Game1"));
-        this.game2 = gameService.createGame(new ServerCreateGameRequest(testUser2AuthData.authToken(), "Test_Game2"));
-        this.game3 = gameService.createGame(new ServerCreateGameRequest(testUser3AuthData.authToken(), "Test_Game3"));
+        this.game1 = gameService.createGame(new CreateGameRequestS(testUser1AuthData.authToken(), "Test_Game1"));
+        this.game2 = gameService.createGame(new CreateGameRequestS(testUser2AuthData.authToken(), "Test_Game2"));
+        this.game3 = gameService.createGame(new CreateGameRequestS(testUser3AuthData.authToken(), "Test_Game3"));
     }
 
     private void player4JoinGame() throws ServiceException, DataAccessException{
-        ServerJoinGameRequest joinRequest = new ServerJoinGameRequest(testUser4AuthData.authToken(), "WHITE", game1.gameID());
+        JoinGameRequestS joinRequest = new JoinGameRequestS(testUser4AuthData.authToken(), "WHITE", game1.gameID());
         gameService.joinGame(joinRequest);
     }
 
@@ -63,7 +63,7 @@ public class GameServiceTests {
     public void createGameSuccess() throws DataAccessException {
         commonServices.deleteGameData();
         Assertions.assertDoesNotThrow(() -> {
-            ServerCreateGameRequest newGameRequest = new ServerCreateGameRequest(testUser1AuthData.authToken(), "Test_Game1");
+            CreateGameRequestS newGameRequest = new CreateGameRequestS(testUser1AuthData.authToken(), "Test_Game1");
             gameService.createGame(newGameRequest);
         });
     }
@@ -73,7 +73,7 @@ public class GameServiceTests {
     public void createGameBadName() throws DataAccessException {
         commonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            ServerCreateGameRequest newGameRequest = new ServerCreateGameRequest(testUser1AuthData.authToken(), null);
+            CreateGameRequestS newGameRequest = new CreateGameRequestS(testUser1AuthData.authToken(), null);
             gameService.createGame(newGameRequest);
         });
         Assertions.assertEquals("400", exception.getMessage());
@@ -84,7 +84,7 @@ public class GameServiceTests {
     public void createGameBadAuth() throws DataAccessException {
         commonServices.deleteGameData();
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
-            ServerCreateGameRequest newGameRequest = new ServerCreateGameRequest("Bad AuthToken", "Test_Game1");
+            CreateGameRequestS newGameRequest = new CreateGameRequestS("Bad AuthToken", "Test_Game1");
             gameService.createGame(newGameRequest);
         });
         Assertions.assertEquals("401", exception.getMessage());
@@ -104,7 +104,7 @@ public class GameServiceTests {
     public void joinGameBadAuth() throws DataAccessException {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
-            ServerJoinGameRequest joinRequest = new ServerJoinGameRequest("Bad AuthToken", "WHITE", game1.gameID());
+            JoinGameRequestS joinRequest = new JoinGameRequestS("Bad AuthToken", "WHITE", game1.gameID());
             gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("401", exception.getMessage());
@@ -115,7 +115,7 @@ public class GameServiceTests {
     public void joinGameBadGameID() throws DataAccessException {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
-            ServerJoinGameRequest joinRequest = new ServerJoinGameRequest(testUser4AuthData.authToken(), "WHITE", 27);
+            JoinGameRequestS joinRequest = new JoinGameRequestS(testUser4AuthData.authToken(), "WHITE", 27);
             gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("400", exception.getMessage());
@@ -126,7 +126,7 @@ public class GameServiceTests {
     public void joinGameBadPlayerColor() throws DataAccessException {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
-            ServerJoinGameRequest joinRequest = new ServerJoinGameRequest(testUser4AuthData.authToken(), "notWhite", game1.gameID());
+            JoinGameRequestS joinRequest = new JoinGameRequestS(testUser4AuthData.authToken(), "notWhite", game1.gameID());
             gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("400", exception.getMessage());
@@ -138,7 +138,7 @@ public class GameServiceTests {
         ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> {
             createTestGames();
             player4JoinGame();
-            ServerJoinGameRequest joinRequest = new ServerJoinGameRequest(testUser5AuthData.authToken(), "WHITE", game1.gameID());
+            JoinGameRequestS joinRequest = new JoinGameRequestS(testUser5AuthData.authToken(), "WHITE", game1.gameID());
             gameService.joinGame(joinRequest);
         });
         Assertions.assertEquals("403", exception.getMessage());
