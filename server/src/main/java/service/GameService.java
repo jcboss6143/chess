@@ -3,9 +3,9 @@ package service;
 import chess.ChessGame;
 import dataaccess.*;
 import model.GameData;
-import model.CreateGameRequest;
+import model.ServerCreateGameRequest;
 import model.CreateGameResult;
-import model.JoinGameRequest;
+import model.ServerJoinGameRequest;
 import model.ListGamesResult;
 
 import java.util.Collection;
@@ -31,7 +31,7 @@ public class GameService {
         return new ListGamesResult(gameData);
     }
 
-    public CreateGameResult createGame(CreateGameRequest makeGameRequest) throws ServiceException, DataAccessException {
+    public CreateGameResult createGame(ServerCreateGameRequest makeGameRequest) throws ServiceException, DataAccessException {
         if (makeGameRequest.gameName() == null){ throw new ServiceException("400"); } // can't have empty game name
         commonServices.getAndVerifyAuthData(makeGameRequest.authToken());
         GameData newGame = new GameData(0, null, null, makeGameRequest.gameName(), new ChessGame());
@@ -39,7 +39,7 @@ public class GameService {
         return new CreateGameResult(id);
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest) throws ServiceException, DataAccessException {
+    public void joinGame(ServerJoinGameRequest joinGameRequest) throws ServiceException, DataAccessException {
         if (joinGameRequest.playerColor() == null){ throw new ServiceException("400"); }
         commonServices.getAndVerifyAuthData(joinGameRequest.authToken());
         GameData gameToJoin = gameAccess.getGame(joinGameRequest.gameID());
