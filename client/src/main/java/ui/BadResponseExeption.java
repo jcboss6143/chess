@@ -1,4 +1,4 @@
-package Requests;
+package ui;
 
 public class BadResponseExeption extends RuntimeException {
     public BadResponseExeption(String message) {

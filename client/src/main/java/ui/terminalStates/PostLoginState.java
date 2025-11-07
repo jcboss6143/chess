@@ -1,7 +1,7 @@
-package terminalStates;
+package ui.terminalStates;
 
-import Requests.BadResponseExeption;
-import Requests.ServerFacade;
+import ui.BadResponseExeption;
+import ui.ServerFacade;
 import chess.ChessGame;
 import chess.ChessPiece;
 import com.google.gson.Gson;

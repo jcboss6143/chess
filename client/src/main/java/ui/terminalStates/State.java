@@ -1,4 +1,4 @@
-package terminalStates;
+package ui.terminalStates;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -6,8 +6,8 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import Requests.BadResponseExeption;
-import Requests.ServerFacade;
+import ui.BadResponseExeption;
+import ui.ServerFacade;
 
 import static ui.EscapeSequences.*;
 

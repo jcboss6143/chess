@@ -1,4 +1,4 @@
-package Requests;
+package ui;
 
 import com.google.gson.Gson;
 import model.ErrorMessage;

@@ -1,6 +1,6 @@
 import chess.*;
-import Requests.ServerFacade;
-import terminalStates.PreLoginState;
+import ui.ServerFacade;
+import ui.terminalStates.PreLoginState;
 
 
 public class Main {

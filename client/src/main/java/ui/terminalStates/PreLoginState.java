@@ -1,7 +1,7 @@
-package terminalStates;
+package ui.terminalStates;
 
-import Requests.ServerFacade;
-import Requests.BadResponseExeption;
+import ui.ServerFacade;
+import ui.BadResponseExeption;
 import com.google.gson.Gson;
 import model.*;
 
@@ -35,7 +35,7 @@ public class PreLoginState extends State {
             String result = requestHandler.makeRequest("POST", "/user", accountInfo);
             AuthData authData = new Gson().fromJson(result, AuthData.class);
             System.out.println(RESET_TEXT_COLOR + "Successfully registered as " + authData.username());
-            // logging the user in. Because we are going to the terminalStates.PostLoginState, we will only return once we are logged out
+            // logging the user in. Because we are going to the ui.terminalStates.PostLoginState, we will only return once we are logged out
             return logUserIn(authData);
         } catch (BadResponseExeption e) {
             if (e.getMessage().startsWith("403")) { return SET_TEXT_COLOR_YELLOW + "Username already taken, try again."; }

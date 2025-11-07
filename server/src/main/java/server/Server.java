@@ -99,11 +99,13 @@ public class Server {
     // =============== Input Formatting =============== //
 
     private void register(Context ctx) throws ServiceException, DataAccessException  {
+        if (ctx.body().isEmpty()) { throw new ServiceException("400"); }
         UserData registerData = new Gson().fromJson(ctx.body(), UserData.class);
         serviceCaller(ctx, registerData, userService::register);
     }
 
     private void login(Context ctx) throws ServiceException, DataAccessException  {
+        if (ctx.body().isEmpty()) { throw new ServiceException("400"); }
         LoginRequest loginData = new Gson().fromJson(ctx.body(), LoginRequest.class);
         serviceCaller(ctx, loginData, userService::login);
     }
@@ -117,12 +119,14 @@ public class Server {
     }
 
     private void createGame(Context ctx) throws ServiceException, DataAccessException  {
+        if (ctx.body().isEmpty()) { throw new ServiceException("400"); }
         CreateGameRequest gameName = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
         CreateGameRequest createGameObject = new CreateGameRequest(ctx.header("authorization"), gameName.gameName());
         serviceCaller(ctx, createGameObject, gameService::createGame);
     }
 
     private void joinGame(Context ctx) throws ServiceException, DataAccessException  {
+        if (ctx.body().isEmpty()) { throw new ServiceException("400"); }
         JoinGameRequest gameInfo = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
         JoinGameRequest joinGameObject = new JoinGameRequest(ctx.header("authorization"), gameInfo.playerColor(), gameInfo.gameID());
         serviceCaller(ctx, joinGameObject, gameService::joinGame);
