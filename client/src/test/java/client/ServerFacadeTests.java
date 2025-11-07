@@ -1,8 +1,7 @@
 package client;
 
 import com.google.gson.Gson;
-import model.AuthData;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import ui.BadResponseExeption;
@@ -76,8 +75,19 @@ public class ServerFacadeTests {
         Assertions.assertTrue(exception.getMessage().startsWith("404"));
     }
 
-// for some reason when I try to create a new game, my code ends up not working. However, if I remove the code from the test file that runs the server
-// and run it separately, it works. I have no idea why, so I left that test out for now.
+
+    @Test
+    public void makePutRequest() {
+        serverFacade.updateAuthToken(authToken);
+        Assertions.assertDoesNotThrow(() -> {
+            CreateGameRequest requestObject = new CreateGameRequest("newGame");
+            String result = serverFacade.makeRequest("POST", "/game", requestObject);
+            CreateGameResult resultObject = new Gson().fromJson(result, CreateGameResult.class);
+            JoinGameRequest requestObject2 = new JoinGameRequest("BLACK", resultObject.gameID());
+            serverFacade.makeRequest("PUT", "/game", requestObject2);
+        });
+    }
+
 
     @Test
     public void badPutRequest() {
