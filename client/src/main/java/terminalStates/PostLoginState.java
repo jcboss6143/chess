@@ -1,9 +1,9 @@
+package terminalStates;
+
 import Requests.BadResponseExeption;
-import Requests.WebRequests;
-import chess.ChessBoard;
+import Requests.ServerFacade;
 import chess.ChessGame;
 import chess.ChessPiece;
-import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.CreateGameResult;
 import model.*;
@@ -16,13 +16,13 @@ import static ui.EscapeSequences.*;
 
 
 
-public class PostLoginState extends UniversalState {
+public class PostLoginState extends State {
     private Map<Integer, GameData> gameMap = new HashMap<>();
 
-    public PostLoginState(String userName, String token, WebRequests webRequests) {
-        super(webRequests);
+    public PostLoginState(String userName, String token, ServerFacade serverFacade) {
+        super(serverFacade);
         displayName = userName;
-        webRequests.updateAuthToken(token);
+        serverFacade.updateAuthToken(token);
     }
 
 
@@ -41,7 +41,7 @@ public class PostLoginState extends UniversalState {
 
 
     private String create(String[] params) throws URISyntaxException, IOException, InterruptedException {
-        if (params.length != 1) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
+        if (params.length != 1) { return SET_TEXT_COLOR_YELLOW + "INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"; }
         CreateGameRequest requestObject = new CreateGameRequest(params[0]);
         String result = requestHandler.makeRequest("POST", "/game", requestObject);
         CreateGameResult resultObject = new Gson().fromJson(result, CreateGameResult.class);
@@ -57,26 +57,37 @@ public class PostLoginState extends UniversalState {
 
 
     private String join(String[] params) throws URISyntaxException, IOException, InterruptedException {
-        if (params.length != 2) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
-        if (!Objects.equals(params[1], "WHITE") && !Objects.equals(params[1], "BLACK")) {
-            throw new BadResponseExeption("INVALID PLAYER COLOR: Second parameter must be either WHITE or BLACK");
+        if (params.length != 2) { return SET_TEXT_COLOR_YELLOW + "INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"; }
+        params[1] = params[1].trim().toUpperCase();
+        if (Objects.equals(params[1], "WHITE") || Objects.equals(params[1], "BLACK")) {
+            try {
+                GameData requestedGame;
+                try { requestedGame = getCachedGameData(params[0]); }
+                catch (BadResponseExeption e) { return SET_TEXT_COLOR_YELLOW + e.getMessage(); }
+                JoinGameRequest requestObject = new JoinGameRequest(params[1], requestedGame.gameID());
+                String result = requestHandler.makeRequest("PUT", "/game", requestObject);
+                return showBoard(requestedGame.game(), Objects.equals(params[1], "BLACK")); // do more silly
+            } catch (BadResponseExeption e) {
+                if (e.getMessage().startsWith("403")) { return SET_TEXT_COLOR_YELLOW + "That seat has already been filled. Please try again"; }
+                else { throw new BadResponseExeption(e.getMessage()); }
+            }
         }
-        GameData requestedGame = getCachedGameData(params[0]);
-        JoinGameRequest requestObject = new JoinGameRequest(params[1], requestedGame.gameID());
-        String result = requestHandler.makeRequest("PUT", "/game", requestObject);
-        return showBoard(requestedGame.game(), Objects.equals(requestedGame.blackUsername(), displayName)); // do more silly
+        return SET_TEXT_COLOR_YELLOW + "INVALID PLAYER COLOR: Second parameter must be either WHITE or BLACK";
     }
 
 
     private String observe(String[] params) {
-        if (params.length != 1) { throw new BadResponseExeption("INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"); }
-        GameData requestedGame = getCachedGameData(params[0]);
+        if (params.length != 1) { return SET_TEXT_COLOR_YELLOW + "INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"; }
+        GameData requestedGame;
+        try { requestedGame = getCachedGameData(params[0]); }
+        catch (BadResponseExeption e) { return SET_TEXT_COLOR_YELLOW + e.getMessage(); }
         return showBoard(requestedGame.game(), Objects.equals(requestedGame.blackUsername(), displayName));
     }
 
 
     private String logout() throws URISyntaxException, IOException, InterruptedException {
         String result = requestHandler.makeRequest("DELETE", "/session", null);
+        requestHandler.clearAuthToken();
         continueLoop = false;
         return "Exiting...";
     }
@@ -122,30 +133,33 @@ public class PostLoginState extends UniversalState {
 
 
     private String showBoard(ChessGame game, boolean invert) {
+        invert = !invert; // accidentally built it inverted, so I had to invert the invert lol
         StringBuilder returnString = new StringBuilder();
         char[] letters = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-        char[] numbers = new char[]{'8', '7', '6', '5', '4', '3', '2', '1'};
+        char[] numbers = new char[]{'1', '2', '3', '4', '5', '6', '7', '8'};
         if (invert) {
             letters = new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
-            numbers = new char[]{'1', '2', '3', '4', '5', '6', '7', '8'};
+            numbers = new char[]{'8', '7', '6', '5', '4', '3', '2', '1'};
         }
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 if (y == 0 || x == 0 || y == 9 || x == 9) {
-                    returnString.append(SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_BLACK);
-                    if ((y == 0 || y == 9) && (x != 0 && x != 9)) { returnString.append(" "+letters[x-1]+" "); }
-                    else if ((x == 0 || x == 9) && (y != 0 && y != 9)) { returnString.append(" "+numbers[y-1]+" "); }
-                    else { returnString.append("   "); }
+                    returnString.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE);
+                    if ((y == 0 || y == 9) && (x != 0 && x != 9)) { returnString.append(" \u2009"+letters[x-1]+"\u2009 "); }
+                    else if ((x == 0 || x == 9) && (y != 0 && y != 9)) { returnString.append(" \u2009"+numbers[y-1]+"\u2009 "); }
+                    else { returnString.append(EMPTY); }
+                    returnString.append(RESET_BG_COLOR);
                 }
                 else {
-                    if (Math.floorDiv((x+y)/2, 2)==0) { returnString.append(SET_BG_COLOR_WHITE); }
+                    returnString.append(SET_TEXT_BOLD);
+                    if ((x+y)%2==0) { returnString.append(SET_BG_COLOR_WHITE); }
                     else { returnString.append(SET_BG_COLOR_BLACK); }
-                    ChessPiece piece = game.getPiece(x, y);
-                    if (invert) { piece = game.getPiece(9-x, 9-y); }
+                    ChessPiece piece = game.getPiece(y, x);
+                    if (invert) { piece = game.getPiece(9-y, 9-x); }
                     if (piece != null) {
                         ChessGame.TeamColor color = piece.getTeamColor();
-                        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) { returnString.append(SET_TEXT_COLOR_RED); }
-                        else { returnString.append(SET_TEXT_COLOR_BLUE); }
+                        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) { returnString.append(SET_TEXT_COLOR_BLUE); }
+                        else { returnString.append(SET_TEXT_COLOR_RED); }
                         ChessPiece.PieceType type = piece.getPieceType();
                         switch (type) {
                             case BISHOP -> { returnString.append(BLACK_BISHOP); }
@@ -154,14 +168,16 @@ public class PostLoginState extends UniversalState {
                             case KNIGHT -> { returnString.append(BLACK_KNIGHT); }
                             case KING -> { returnString.append(BLACK_KING); }
                             case PAWN -> { returnString.append(BLACK_PAWN); }
-                            case null, default -> { returnString.append("   "); }
+                            case null, default -> { returnString.append(EMPTY); }
                         }
                     }
-                    else { returnString.append("   "); }
+                    else { returnString.append(EMPTY); }
+                    returnString.append(RESET_TEXT_BOLD_FAINT);
                 }
             }
             returnString.append("\n");
         }
+        returnString.append(RESET_BG_COLOR);
         return returnString.toString();
     }
 

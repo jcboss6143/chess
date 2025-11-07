@@ -1,7 +1,6 @@
 package Requests;
 
 import com.google.gson.Gson;
-import model.*;
 import model.ErrorMessage;
 
 import java.io.IOException;
@@ -12,19 +11,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Locale;
 
-public class WebRequests {
+public class ServerFacade {
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private final String serverURL;
     private final int port;
     private String authToken;
 
-    public WebRequests(String url, int webPort) {
+    public ServerFacade(String url, int webPort) {
         serverURL = url;
         port = webPort;
         authToken = null;
     }
 
     public void updateAuthToken(String auth) { authToken = auth; }
+
     public void clearAuthToken() { authToken = null; }
 
     public String makeRequest(String method, String path, Object body) throws URISyntaxException, IOException, InterruptedException {
@@ -34,7 +34,8 @@ public class WebRequests {
             return httpResponse.body();
         } else {
             ErrorMessage message = new Gson().fromJson(httpResponse.body(), ErrorMessage.class);
-            throw new BadResponseExeption(message.message());
+            String statusCode = String.valueOf(httpResponse.statusCode());
+            throw new BadResponseExeption(statusCode + "; " + message.message());
         }
     }
 
@@ -53,9 +54,5 @@ public class WebRequests {
         }
         return request.build();
     }
-
-
-
-
 
 }
