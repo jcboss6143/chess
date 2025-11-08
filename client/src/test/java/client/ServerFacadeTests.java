@@ -44,7 +44,26 @@ public class ServerFacadeTests {
     public void makePostRequest() {
         serverFacade.updateAuthToken(authToken);
         Assertions.assertDoesNotThrow(() -> {
+            serverFacade.makeRequest("POST", "/user", new UserData("Joe3", "Joe3", "Joe3"));
+        });
+    }
+
+    @Test
+    public void loginPostRequest() {
+        serverFacade.updateAuthToken(authToken);
+        Assertions.assertDoesNotThrow(() -> {
             serverFacade.makeRequest("POST", "/user", new UserData("Joe2", "Joe2", "Joe2"));
+            LoginRequest loginRequest = new LoginRequest("Joe2", "Joe2");
+            serverFacade.makeRequest("POST", "/session", loginRequest);
+        });
+    }
+
+    @Test
+    public void postGameRequest() {
+        serverFacade.updateAuthToken(authToken);
+        Assertions.assertDoesNotThrow(() -> {
+            CreateGameRequest requestObject = new CreateGameRequest("myGame");
+            String result = serverFacade.makeRequest("POST", "/game", requestObject);
         });
     }
 
@@ -53,6 +72,25 @@ public class ServerFacadeTests {
         serverFacade.updateAuthToken(authToken);
         BadResponseExeption exception = Assertions.assertThrows(BadResponseExeption.class, () -> {
             serverFacade.makeRequest("POST", "/user", null);
+        });
+        Assertions.assertTrue(exception.getMessage().startsWith("400"));
+    }
+
+    @Test
+    public void badLoginPostRequest() throws URISyntaxException, IOException, InterruptedException {
+        serverFacade.updateAuthToken(authToken);
+        BadResponseExeption exception = Assertions.assertThrows(BadResponseExeption.class, () -> {
+            LoginRequest loginRequest = new LoginRequest("Joe5", "Joe5");
+            serverFacade.makeRequest("POST", "/session", loginRequest);
+        });
+        Assertions.assertTrue(exception.getMessage().startsWith("401"));
+    }
+
+    @Test
+    public void badPostGameRequest() throws URISyntaxException, IOException, InterruptedException {
+        serverFacade.updateAuthToken(authToken);
+        BadResponseExeption exception = Assertions.assertThrows(BadResponseExeption.class, () -> {
+            String result = serverFacade.makeRequest("POST", "/game", null);
         });
         Assertions.assertTrue(exception.getMessage().startsWith("400"));
     }
