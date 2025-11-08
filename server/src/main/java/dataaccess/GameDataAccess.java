@@ -22,7 +22,8 @@ public class GameDataAccess implements GameAccess{
 
     public Integer addGame(GameData newGame) throws DataAccessException {
         nextGameNumber += 1;
-        gameInfo.put(nextGameNumber, new GameData(nextGameNumber, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), new ChessGame()));
+        gameInfo.put(nextGameNumber,
+                new GameData(nextGameNumber, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), new ChessGame()));
         return nextGameNumber;
     }
 

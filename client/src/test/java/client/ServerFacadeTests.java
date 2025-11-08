@@ -6,7 +6,6 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import ui.BadResponseExeption;
 import ui.ServerFacade;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 
