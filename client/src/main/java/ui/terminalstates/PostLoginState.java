@@ -45,7 +45,7 @@ public class PostLoginState extends State {
         CreateGameRequest requestObject = new CreateGameRequest(params[0]);
         String result = requestHandler.makeRequest("POST", "/game", requestObject);
         CreateGameResult resultObject = new Gson().fromJson(result, CreateGameResult.class);
-        return "Game creation was successful! GameID: " + resultObject.gameID();
+        return "Game creation was successful!";
     }
 
 
@@ -135,10 +135,10 @@ public class PostLoginState extends State {
     private String showBoard(ChessGame game, boolean invert) {
         invert = !invert; // accidentally built it inverted, so I had to invert the invert lol
         StringBuilder returnString = new StringBuilder();
-        char[] letters = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        char[] letters = new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
         char[] numbers = new char[]{'1', '2', '3', '4', '5', '6', '7', '8'};
         if (invert) {
-            letters = new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
+            letters = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
             numbers = new char[]{'8', '7', '6', '5', '4', '3', '2', '1'};
         }
         for (int y = 0; y < 10; y++) {
@@ -164,8 +164,8 @@ public class PostLoginState extends State {
             returnString.append(SET_TEXT_BOLD);
             if ((x+y)%2==0) { returnString.append(SET_BG_COLOR_WHITE); }
             else { returnString.append(SET_BG_COLOR_BLACK); }
-            ChessPiece piece = game.getPiece(y, x);
-            if (invert) { piece = game.getPiece(9-y, 9-x); }
+            ChessPiece piece = game.getPiece(y, 9-x);
+            if (invert) { piece = game.getPiece(9-y, x); }
             if (piece != null) {
                 ChessGame.TeamColor color = piece.getTeamColor();
                 if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) { returnString.append(SET_TEXT_COLOR_BLUE); }
