@@ -16,7 +16,6 @@ public class ConnectionManager {
     public void add(Integer gameID, Session session) {
         ConcurrentHashMap<Session, Session> gameSessions = connections.computeIfAbsent(gameID, k -> new ConcurrentHashMap<>());
         gameSessions.put(session, session);
-
     }
 
     public void remove(Integer gameID, Session session) {

@@ -54,6 +54,11 @@ public class GameService {
             throw new ServiceException("400"); } // request didn't have a valid player color
     }
 
+
+    public GameData getGame(Integer gameID) throws DataAccessException {
+        return gameAccess.getGame(gameID);
+    }
+
     private void updateGame(GameData gameToJoin, String playerSeat, String whiteSeat, String blackSeat)
             throws ServiceException, DataAccessException {
         if (playerSeat != null) { throw new ServiceException("403"); } // the seat the player wanted to take is already taken

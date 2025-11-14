@@ -8,14 +8,18 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import service.CommonServices;
 import service.GameService;
 import service.UserService;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
@@ -57,21 +61,44 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connectCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         connections.add(gameID, session);
         String username = userService.getUsernameFromAuth(authToken);
+        GameData gameInfo = gameService.getGame(gameID);
+        if (gameInfo == null) {
 
-        var message = String.format("%s joined the game", username);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        }
+
+        String joinedAs;
+        if (Objects.equals(gameInfo.blackUsername(), username)) { joinedAs = "black"; }
+        else if (Objects.equals(gameInfo.whiteUsername(), username)) { joinedAs = "white"; }
+        else { joinedAs = "an observer"; }
+
+        String message = String.format("%s joined the game as %S", username, joinedAs);
+        NotificationMessage notification = new NotificationMessage(message);
         connections.broadcast(gameID, session, notification, true);
+
+        LoadGameMessage loadGame = new LoadGameMessage(gameInfo);
+        connections.broadcast(gameID, session, notification, false);
     }
 
-    private void makeMoveCommand(String authToken, Integer gameID, Session session) {
-
+    private void makeMoveCommand(String authToken, Integer gameID, Session session) throws DataAccessException {
+        String username = userService.getUsernameFromAuth(authToken);
+        GameData gameInfo = gameService.getGame(gameID);
     }
 
-    private void leaveCommand(String authToken, Integer gameID, Session session) {
+    private void leaveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
+        connections.remove(gameID, session);
+        String username = userService.getUsernameFromAuth(authToken);
+        String message = String.format("%s left the game", username);
+        NotificationMessage notification = new NotificationMessage(message);
+        connections.broadcast(gameID, session, notification, true);
 
     }
 
     private void resignCommand(String authToken, Integer gameID, Session session) {
+
+    }
+
+
+    private void broadcastError(String message){
 
     }
 }
