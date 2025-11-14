@@ -5,6 +5,7 @@ import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
+import server.websocket.WebsocketHandler;
 import service.CommonServices;
 import service.GameService;
 import service.ServiceException;
@@ -15,14 +16,28 @@ import model.LoginRequest;
 import java.util.Map;
 
 
+
 public class Server {
 
     private final Javalin server;
     private final CommonServices commonServices;
     private final UserService userService;
     private final GameService gameService;
+    private final WebsocketHandler websocketHandler;
 
     public Server() {
+        try {
+            AuthAccess authAccess = new AuthAccessSQL();
+            GameAccess gameAccess = new GameAccessSQL();
+            UserAccess userAccess = new UserAccessSQL();
+            this.commonServices = new CommonServices(authAccess, gameAccess, userAccess);
+            this.userService = new UserService(authAccess, userAccess, commonServices);
+            this.gameService = new GameService(commonServices, gameAccess, authAccess);
+            this.websocketHandler = new WebsocketHandler(commonServices, userService, gameService);
+        } catch (Throwable ex) {
+            throw new RuntimeException("Database initialization failed", ex);
+        }
+
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.delete("db", this::clearApplication);
         server.post("user", this::register);
@@ -31,18 +46,13 @@ public class Server {
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("game", this::joinGame);
+        server.ws("/ws", ws -> {
+            ws.onConnect(websocketHandler);
+            ws.onMessage(websocketHandler);
+            ws.onClose(websocketHandler);
+        });
         server.exception(Exception.class, this::exceptionHandler);
         server.error(404, this::notFoundError);
-        try {
-            AuthAccess authAccess = new AuthAccessSQL();
-            GameAccess gameAccess = new GameAccessSQL();
-            UserAccess userAccess = new UserAccessSQL();
-            this.commonServices = new CommonServices(authAccess, gameAccess, userAccess);
-            this.userService = new UserService(authAccess, userAccess, commonServices);
-            this.gameService = new GameService(commonServices, gameAccess, authAccess);
-        } catch (Throwable ex) {
-            throw new RuntimeException("Database initialization failed", ex);
-        }
     }
 
 

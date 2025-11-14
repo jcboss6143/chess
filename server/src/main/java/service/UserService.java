@@ -41,6 +41,13 @@ public class UserService {
         authAccess.deleteAuth(commonServices.getAndVerifyAuthData(authToken));
     }
 
+
+    public String getUsernameFromAuth(String authToken) throws DataAccessException, DataAccessException {
+        AuthData userInfo = authAccess.getAuthData(authToken);
+        return userInfo.username();
+    }
+
+
     private AuthData createAuthObject(String username) throws DataAccessException {
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[24];

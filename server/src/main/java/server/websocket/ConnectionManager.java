@@ -2,6 +2,8 @@ package server.websocket;
 
 import java.util.Vector;
 import java.util.Map;
+
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
@@ -18,18 +20,25 @@ public class ConnectionManager {
     }
 
     public void remove(Integer gameID, Session session) {
-        ConcurrentHashMap<Session, Session> gameSessions = connections.computeIfAbsent(gameID, k -> new ConcurrentHashMap<>());
+        ConcurrentHashMap<Session, Session> gameSessions = connections.get(gameID);
         gameSessions.remove(session);
     }
 
-//    public void broadcast(Session excludeSession, Notification notification) throws IOException {
-//        String msg = notification.toString();
-//        for (Session c : connections.values()) {
-//            if (c.isOpen()) {
-//                if (!c.equals(excludeSession)) {
-//                    c.getRemote().sendString(msg);
-//                }
-//            }
-//        }
-//    }
+    public void broadcast(Integer gameID, Session session, ServerMessage notification, boolean excludeSession) throws IOException {
+        String msg = new Gson().toJson(notification);
+        ConcurrentHashMap<Session, Session> gameSessions = connections.get(gameID);
+        for (Session c : gameSessions.values()) {
+            if (c.isOpen()) {
+                if (session == null) {
+                    c.getRemote().sendString(msg);
+                }
+                else if (!c.equals(session) && excludeSession) {
+                    c.getRemote().sendString(msg);
+                }
+                else if (c.equals(session) && !excludeSession) {
+                    c.getRemote().sendString(msg);
+                }
+            }
+        }
+    }
 }
