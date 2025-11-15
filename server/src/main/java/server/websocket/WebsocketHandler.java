@@ -14,6 +14,7 @@ import service.CommonServices;
 import service.GameService;
 import service.UserService;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -59,12 +60,14 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connectCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
-        connections.add(gameID, session);
         String username = userService.getUsernameFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
         if (gameInfo == null) {
-
+            broadcastError(gameID, session, "Error: Invalid gameID");
+            return;
         }
+
+        connections.add(gameID, session);
 
         String joinedAs;
         if (Objects.equals(gameInfo.blackUsername(), username)) { joinedAs = "black"; }
@@ -76,17 +79,28 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(gameID, session, notification, true);
 
         LoadGameMessage loadGame = new LoadGameMessage(gameInfo);
-        connections.broadcast(gameID, session, notification, false);
+        connections.broadcast(gameID, session, loadGame, false);
     }
 
-    private void makeMoveCommand(String authToken, Integer gameID, Session session) throws DataAccessException {
+    private void makeMoveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         String username = userService.getUsernameFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
+        if (gameInfo == null) {
+            broadcastError(gameID, session, "Error: Invalid gameID");
+            return;
+        }
     }
 
     private void leaveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
-        connections.remove(gameID, session);
         String username = userService.getUsernameFromAuth(authToken);
+        GameData gameInfo = gameService.getGame(gameID);
+        if (gameInfo == null) {
+            broadcastError(gameID, session, "Error: Invalid gameID");
+            return;
+        }
+
+        connections.remove(gameID, session);
+
         String message = String.format("%s left the game", username);
         NotificationMessage notification = new NotificationMessage(message);
         connections.broadcast(gameID, session, notification, true);
@@ -98,7 +112,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
 
-    private void broadcastError(String message){
-
+    private void broadcastError(Integer gameID, Session session, String message) throws IOException {
+        ErrorMessage errorMsg = new ErrorMessage(message);
+        connections.broadcast(gameID, session, errorMsg, false);
     }
 }
