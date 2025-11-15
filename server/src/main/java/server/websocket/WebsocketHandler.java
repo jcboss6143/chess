@@ -11,6 +11,7 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import service.CommonServices;
@@ -64,12 +65,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connectCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
-        String username = userService.getUsernameFromAuth(authToken);
+        AuthData authInfo = userService.getUserInfoFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
-        if (gameInfo == null || username == null) {
-            broadcastError(gameID, session, "Error: Invalid request");
-            return;
-        }
+        if (validateRequest(authInfo, gameInfo, gameID, session)) { return; }
+
+        String username = authInfo.username();
 
         connections.add(gameID, session);
 
@@ -87,12 +87,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMoveCommand(String authToken, Integer gameID, Session session, ChessMove move) throws DataAccessException, IOException {
-        String username = userService.getUsernameFromAuth(authToken);
+        AuthData authInfo = userService.getUserInfoFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
-        if (gameInfo == null || username == null) {
-            broadcastError(gameID, session, "Error: Invalid request");
-            return;
-        }
+        if (validateRequest(authInfo, gameInfo, gameID, session)) { return; }
+
+        String username = authInfo.username();
 
         ChessGame game = gameInfo.game();
         ChessGame.TeamColor teamTurn = game.getTeamTurn();
@@ -139,11 +138,19 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void leaveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
-        String username = userService.getUsernameFromAuth(authToken);
+        AuthData authInfo = userService.getUserInfoFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
-        if (gameInfo == null || username == null) {
-            broadcastError(gameID, session, "Error: Invalid request");
-            return;
+        if (validateRequest(authInfo, gameInfo, gameID, session)) { return; }
+
+        String username = authInfo.username();
+
+        if (Objects.equals(gameInfo.blackUsername(), username)) {
+            gameInfo = new GameData(gameInfo.gameID(), gameInfo.whiteUsername(), null, gameInfo.gameName(), gameInfo.game());
+            gameService.updateGame(gameInfo);
+        }
+        if (Objects.equals(gameInfo.whiteUsername(), username)) {
+            gameInfo = new GameData(gameInfo.gameID(), null, gameInfo.blackUsername(), gameInfo.gameName(), gameInfo.game());
+            gameService.updateGame(gameInfo);
         }
 
         String message = String.format("%s left the game", username);
@@ -153,12 +160,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void resignCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
-        String username = userService.getUsernameFromAuth(authToken);
+        AuthData authInfo = userService.getUserInfoFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
-        if (gameInfo == null || username == null) {
-            broadcastError(gameID, session, "Error: Invalid request");
-            return;
-        }
+        if (validateRequest(authInfo, gameInfo, gameID, session)) { return; }
+
+        String username = authInfo.username();
 
         if (!Objects.equals(gameInfo.blackUsername(), username) && !Objects.equals(gameInfo.whiteUsername(), username)) {
             broadcastError(gameID, session, "Error: Unauthorized");
@@ -166,18 +172,32 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         gameInfo.game().playerResigned();
+        gameService.updateGame(gameInfo);
 
         String resigner;
         if (Objects.equals(gameInfo.blackUsername(), username)) { resigner = "black"; }
         else { resigner = "white"; }
         String message = String.format("%s (%s) has resigned", username, resigner);
         NotificationMessage notification = new NotificationMessage(message);
-        connections.broadcast(gameID, session, notification, true);
+        connections.broadcast(gameID, null, notification, false);
     }
 
 
     private void broadcastError(Integer gameID, Session session, String message) throws IOException {
         ErrorMessage errorMsg = new ErrorMessage(message);
         connections.broadcast(gameID, session, errorMsg, false);
+    }
+
+
+    private boolean validateRequest(AuthData authInfo, GameData gameInfo, Integer gameID, Session session) throws IOException {
+        if (gameInfo == null || authInfo == null) {
+            broadcastError(gameID, session, "Error: Invalid request");
+            return true;
+        }
+        if (gameInfo.game().isGameFinished()) {
+            broadcastError(gameID, session, "Error: Game Is Finished");
+            return true;
+        }
+        return false;
     }
 }

@@ -92,6 +92,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (gameFinished) {
+            throw new InvalidMoveException("Game has ended");
+        }
+
         Collection<ChessMove> potentialMoves = validMoves(move.getStartPosition()); // gets all possible valid moves
 
         // verifies that the move provided is a valid move
@@ -265,9 +269,6 @@ public class ChessGame {
         gameFinished = true;
     }
 
-    public TeamColor getPlayerTurnColor() {
-        return teamTurn;
-    }
 
 
 

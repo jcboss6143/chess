@@ -42,9 +42,8 @@ public class UserService {
     }
 
 
-    public String getUsernameFromAuth(String authToken) throws DataAccessException, DataAccessException {
-        AuthData userInfo = authAccess.getAuthData(authToken);
-        return userInfo.username();
+    public AuthData getUserInfoFromAuth(String authToken) throws DataAccessException, DataAccessException {
+        return authAccess.getAuthData(authToken);
     }
 
 
