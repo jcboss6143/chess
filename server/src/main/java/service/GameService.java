@@ -47,19 +47,22 @@ public class GameService {
         if (gameToJoin == null) { throw new ServiceException("400"); } // thrown if game doesn't exist
         String username = authAccess.getAuthData(joinGameRequest.authToken()).username();
         if (Objects.equals(color, "BLACK")) {
-            updateGame(gameToJoin, gameToJoin.blackUsername(), gameToJoin.whiteUsername(), username);
+            updateGamePlayer(gameToJoin, gameToJoin.blackUsername(), gameToJoin.whiteUsername(), username);
         } else if (Objects.equals(color, "WHITE")) {
-            updateGame(gameToJoin, gameToJoin.whiteUsername(), username, gameToJoin.blackUsername());
+            updateGamePlayer(gameToJoin, gameToJoin.whiteUsername(), username, gameToJoin.blackUsername());
         } else {
             throw new ServiceException("400"); } // request didn't have a valid player color
     }
-
 
     public GameData getGame(Integer gameID) throws DataAccessException {
         return gameAccess.getGame(gameID);
     }
 
-    private void updateGame(GameData gameToJoin, String playerSeat, String whiteSeat, String blackSeat)
+    public void updateGame(GameData game) throws DataAccessException {
+        gameAccess.updateGame(game);
+    }
+
+    private void updateGamePlayer(GameData gameToJoin, String playerSeat, String whiteSeat, String blackSeat)
             throws ServiceException, DataAccessException {
         if (playerSeat != null) { throw new ServiceException("403"); } // the seat the player wanted to take is already taken
         GameData updatedGame = new GameData(gameToJoin.gameID(), whiteSeat, blackSeat, gameToJoin.gameName(), gameToJoin.game());

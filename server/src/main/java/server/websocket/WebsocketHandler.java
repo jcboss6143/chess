@@ -1,5 +1,8 @@
 package server.websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
@@ -20,6 +23,7 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Objects;
 
 
@@ -62,8 +66,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connectCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         String username = userService.getUsernameFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
-        if (gameInfo == null) {
-            broadcastError(gameID, session, "Error: Invalid gameID");
+        if (gameInfo == null || username == null) {
+            broadcastError(gameID, session, "Error: Invalid request");
             return;
         }
 
@@ -85,30 +89,80 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void makeMoveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         String username = userService.getUsernameFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
-        if (gameInfo == null) {
-            broadcastError(gameID, session, "Error: Invalid gameID");
+        if (gameInfo == null || username == null) {
+            broadcastError(gameID, session, "Error: Invalid request");
             return;
         }
+
+        ChessGame game = gameInfo.game();
+
+        if (!Objects.equals(gameInfo.blackUsername(), username) && !Objects.equals(gameInfo.whiteUsername(), username)) {
+            broadcastError(gameID, session, "Error: Unauthorized");
+            return;
+        }
+
+        if (game.getTeamTurn() == ChessGame.TeamColor.WHITE && !Objects.equals(gameInfo.whiteUsername(), username)){
+            broadcastError(gameID, session, "Error: Unauthorized");
+            return;
+        }
+
+        if (game.getTeamTurn() == ChessGame.TeamColor.BLACK && !Objects.equals(gameInfo.blackUsername(), username)){
+            broadcastError(gameID, session, "Error: Unauthorized");
+            return;
+        }
+
+        try {
+            game.makeMove(null);
+        } catch (InvalidMoveException e) {
+            broadcastError(gameID, session, "Error: Invalid Move");
+            return;
+        }
+
+        GameData updatedGame = new GameData(gameInfo.gameID(), gameInfo.whiteUsername(), gameInfo.blackUsername(), gameInfo.gameName(), game);
+        gameService.updateGame(updatedGame);
+
+        LoadGameMessage loadGame = new LoadGameMessage(updatedGame);
+        connections.broadcast(gameID, null, loadGame, false);
+
+
+
     }
 
     private void leaveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         String username = userService.getUsernameFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
-        if (gameInfo == null) {
-            broadcastError(gameID, session, "Error: Invalid gameID");
+        if (gameInfo == null || username == null) {
+            broadcastError(gameID, session, "Error: Invalid request");
             return;
         }
-
-        connections.remove(gameID, session);
 
         String message = String.format("%s left the game", username);
         NotificationMessage notification = new NotificationMessage(message);
         connections.broadcast(gameID, session, notification, true);
-
+        connections.remove(gameID, session);
     }
 
-    private void resignCommand(String authToken, Integer gameID, Session session) {
+    private void resignCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
+        String username = userService.getUsernameFromAuth(authToken);
+        GameData gameInfo = gameService.getGame(gameID);
+        if (gameInfo == null || username == null) {
+            broadcastError(gameID, session, "Error: Invalid request");
+            return;
+        }
 
+        if (!Objects.equals(gameInfo.blackUsername(), username) && !Objects.equals(gameInfo.whiteUsername(), username)) {
+            broadcastError(gameID, session, "Error: Unauthorized");
+            return;
+        }
+
+        gameInfo.game().playerResigned();
+
+        String resigner;
+        if (Objects.equals(gameInfo.blackUsername(), username)) { resigner = "black"; }
+        else { resigner = "white"; }
+        String message = String.format("%s (%s) has resigned", username, resigner);
+        NotificationMessage notification = new NotificationMessage(message);
+        connections.broadcast(gameID, session, notification, true);
     }
 
 

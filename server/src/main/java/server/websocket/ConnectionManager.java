@@ -25,16 +25,17 @@ public class ConnectionManager {
 
     public void broadcast(Integer gameID, Session session, ServerMessage notification, boolean excludeSession) throws IOException {
         String msg = new Gson().toJson(notification);
+        if (session != null && !excludeSession) {
+            session.getRemote().sendString(msg);
+            return;
+        }
         ConcurrentHashMap<Session, Session> gameSessions = connections.get(gameID);
         for (Session c : gameSessions.values()) {
             if (c.isOpen()) {
                 if (session == null) {
                     c.getRemote().sendString(msg);
                 }
-                else if (!c.equals(session) && excludeSession) {
-                    c.getRemote().sendString(msg);
-                }
-                else if (c.equals(session) && !excludeSession) {
+                else if (!c.equals(session)) {
                     c.getRemote().sendString(msg);
                 }
             }

@@ -14,6 +14,7 @@ public class ChessGame {
 
     private ChessBoard board = new ChessBoard();
     private TeamColor teamTurn = TeamColor.WHITE;
+    private boolean gameFinished = false;
 
     public ChessGame() {
         board.resetBoard();
@@ -233,7 +234,11 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) & !isMovePossible(teamColor);
+        if (isInCheck(teamColor) & !isMovePossible(teamColor)) {
+            gameFinished = true;
+            return true;
+        }
+        return false;
     }
 
 
@@ -245,10 +250,24 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        return !isInCheck(teamColor) & !isMovePossible(teamColor);
+        if (!isInCheck(teamColor) & !isMovePossible(teamColor)) {
+            gameFinished = true;
+            return true;
+        }
+        return false;
     }
 
+    public boolean isGameFinished() {
+        return gameFinished;
+    }
 
+    public void playerResigned() {
+        gameFinished = true;
+    }
+
+    public TeamColor getPlayerTurnColor() {
+        return teamTurn;
+    }
 
 
 
