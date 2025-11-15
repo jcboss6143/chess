@@ -52,7 +52,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
         switch (command.getCommandType()) {
             case CONNECT -> connectCommand(command.getAuthToken(), command.getGameID(), ctx.session);
-            case MAKE_MOVE -> makeMoveCommand(command.getAuthToken(), command.getGameID(), ctx.session);
+            case MAKE_MOVE -> makeMoveCommand(command.getAuthToken(), command.getGameID(), ctx.session, command.getMove());
             case LEAVE -> leaveCommand(command.getAuthToken(), command.getGameID(), ctx.session);
             case RESIGN -> resignCommand(command.getAuthToken(), command.getGameID(), ctx.session);
         }
@@ -86,7 +86,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(gameID, session, loadGame, false);
     }
 
-    private void makeMoveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
+    private void makeMoveCommand(String authToken, Integer gameID, Session session, ChessMove move) throws DataAccessException, IOException {
         String username = userService.getUsernameFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
         if (gameInfo == null || username == null) {
@@ -95,24 +95,27 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         ChessGame game = gameInfo.game();
+        ChessGame.TeamColor teamTurn = game.getTeamTurn();
 
         if (!Objects.equals(gameInfo.blackUsername(), username) && !Objects.equals(gameInfo.whiteUsername(), username)) {
             broadcastError(gameID, session, "Error: Unauthorized");
             return;
         }
 
-        if (game.getTeamTurn() == ChessGame.TeamColor.WHITE && !Objects.equals(gameInfo.whiteUsername(), username)){
+        boolean isBlack = Objects.equals(gameInfo.blackUsername(), username);
+
+        if (teamTurn == ChessGame.TeamColor.WHITE && isBlack){
             broadcastError(gameID, session, "Error: Unauthorized");
             return;
         }
 
-        if (game.getTeamTurn() == ChessGame.TeamColor.BLACK && !Objects.equals(gameInfo.blackUsername(), username)){
+        if (teamTurn == ChessGame.TeamColor.BLACK && !isBlack){
             broadcastError(gameID, session, "Error: Unauthorized");
             return;
         }
 
         try {
-            game.makeMove(null);
+            game.makeMove(move);
         } catch (InvalidMoveException e) {
             broadcastError(gameID, session, "Error: Invalid Move");
             return;
@@ -124,8 +127,15 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         LoadGameMessage loadGame = new LoadGameMessage(updatedGame);
         connections.broadcast(gameID, null, loadGame, false);
 
-
-
+        String playerColor;
+        if (isBlack) { playerColor = "black"; }
+        else { playerColor = "white"; }
+        // broadcast the move made!
+        String startPos = move.getStartPosition().toString();
+        String endPos = move.getEndPosition().toString();
+        String message = String.format("%s (%s) moved %s to %s ", username, playerColor, startPos, endPos);
+        NotificationMessage notification = new NotificationMessage(message);
+        connections.broadcast(gameID, session, notification, true);
     }
 
     private void leaveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
