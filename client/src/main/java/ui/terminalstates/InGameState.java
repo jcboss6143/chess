@@ -44,21 +44,61 @@ public class InGameState extends State implements ServerMessageHandler {
 //            case "list" -> list();
 //            case "join" -> join(params);
 //            case "observe" -> observe(params);
-//            case "logout" -> logout();
+            case "highlight" -> highlight(params);
             case "help" -> help();
             default -> "INVALID COMMAND: Use 'help' command to see a list of valid commands";
         };
     }
 
+    private String highlight(String[] params) {
+        if (params.length != 1) { return SET_TEXT_COLOR_YELLOW + "INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"; }
+        ChessPosition position = translateLetterNumber(params[0]);
+        if (position == null) {  return SET_TEXT_COLOR_YELLOW + "InvalidPosition. Please try again"; }
+        return showBoard(position);
+    }
+
     private String help() {
         return """
-                Redraw - create a new game
+                redraw - create a new game
                 leave - leave the game
-                Move <startXY> <endXY> - make a move
-                Resign - surrender
-                Highlight <XY> - highlight piece at this position
+                move <LetterNumber> <LetterNumber> - make a move
+                resign - surrender
+                highlight <LetterNumber> - highlight piece at this position
                 help - list possible commands
                 """;
+    }
+
+
+    private ChessPosition translateLetterNumber(String letterNumber) {
+        char letter = letterNumber.charAt(0); // corresponds with y
+        char number = letterNumber.charAt(1); // corresponds with x
+        int x;
+        int y = switch (letter) {
+            case 'a' -> 1;
+            case 'b' -> 2;
+            case 'c' -> 3;
+            case 'd' -> 4;
+            case 'e' -> 5;
+            case 'f' -> 6;
+            case 'g' -> 7;
+            case 'h' -> 8;
+            default -> 0;
+        };
+        x = switch (number) {
+            case '1' -> 1;
+            case '2' -> 2;
+            case '3' -> 3;
+            case '4' -> 4;
+            case '5' -> 5;
+            case '6' -> 6;
+            case '7' -> 7;
+            case '8' -> 8;
+            default -> 0;
+        };
+        if (x == 0 || y == 0) {
+            return null;
+        }
+        return new ChessPosition(x, y);
     }
 
 
@@ -85,7 +125,7 @@ public class InGameState extends State implements ServerMessageHandler {
         StringBuilder returnString = new StringBuilder();
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
-                updateBoardCell(x, y, returnString, letters, numbers, positions);
+                updateBoardCell(x, y, returnString, letters, numbers, positions, position);
             }
             returnString.append("\n");
         }
@@ -94,7 +134,7 @@ public class InGameState extends State implements ServerMessageHandler {
     }
 
 
-    private void updateBoardCell(int x, int y, StringBuilder returnString, char[] letters, char[] numbers, Collection<ChessPosition> positions) {
+    private void updateBoardCell(int x, int y, StringBuilder returnString, char[] letters, char[] numbers, Collection<ChessPosition> positions, ChessPosition position) {
         if (y == 0 || x == 0 || y == 9 || x == 9) {
             returnString.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE);
             if ((y == 0 || y == 9) && (x != 0 && x != 9)) { returnString.append(" \u2009"+letters[x-1]+"\u2009 "); }
@@ -122,6 +162,9 @@ public class InGameState extends State implements ServerMessageHandler {
                     if (blackSquare) { returnString.append(SET_BG_COLOR_DARK_GREEN); }
                     else { returnString.append(SET_BG_COLOR_GREEN); }
                 }
+            }
+            if (position != null) {
+                returnString.append(SET_BG_COLOR_YELLOW);
             }
 
 
