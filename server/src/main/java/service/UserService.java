@@ -13,11 +13,13 @@ public class UserService {
     private final UserAccess userAccess;
     private final CommonServices commonServices;
 
+
     public UserService(AuthAccess authAccess, UserAccess userAccess, CommonServices commonServices) {
         this.authAccess = authAccess;
         this.userAccess = userAccess;
         this.commonServices = commonServices;
     }
+
 
     public AuthData register(UserData registerRequest) throws ServiceException, DataAccessException {
         if ((registerRequest.password() == null) || (registerRequest.username() == null) || (registerRequest.email() == null)){
@@ -28,6 +30,7 @@ public class UserService {
         return createAuthObject(registerRequest.username());
     }
 
+
     public AuthData login(LoginRequest loginRequest) throws ServiceException, DataAccessException {
         if ((loginRequest.password() == null) || (loginRequest.username() == null)){
             throw new ServiceException("400"); }
@@ -36,6 +39,7 @@ public class UserService {
             throw new ServiceException("401"); } // verifies user exists and passwords match
         return createAuthObject(loginRequest.username());
     }
+
 
     public void logout(String authToken) throws ServiceException, DataAccessException {
         authAccess.deleteAuth(commonServices.getAndVerifyAuthData(authToken));

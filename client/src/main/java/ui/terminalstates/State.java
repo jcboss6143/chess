@@ -6,6 +6,8 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import chess.ChessGame;
+import chess.ChessPiece;
 import ui.BadResponseExeption;
 import ui.ServerFacade;
 
