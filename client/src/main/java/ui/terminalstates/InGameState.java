@@ -40,14 +40,31 @@ public class InGameState extends State implements ServerMessageHandler {
     @Override
     String evaluateCommand(String cmd, String[] params) throws URISyntaxException, IOException, InterruptedException {
         return switch (cmd) {
-//            case "create" -> create(params);
-//            case "list" -> list();
-//            case "join" -> join(params);
-//            case "observe" -> observe(params);
+            case "redraw" -> showBoard(null);
+            case "leave" -> leave();
+            case "move" -> makeMove(params);
+            case "resign" -> resign();
             case "highlight" -> highlight(params);
             case "help" -> help();
             default -> "INVALID COMMAND: Use 'help' command to see a list of valid commands";
         };
+    }
+
+    private String makeMove(String[] params) {
+        if (params.length != 2) { return SET_TEXT_COLOR_YELLOW + "INVALID NUMBER OF PARAMETERS: use the 'help' command to view command syntax"; }
+        ChessPosition startPosition = translateLetterNumber(params[0]);
+        ChessPosition endPosition = translateLetterNumber(params[1]);
+        if (startPosition == null || endPosition == null) {  return SET_TEXT_COLOR_YELLOW + "InvalidPosition. Please try again"; }
+        return "implement";
+    }
+
+    private String resign() {
+        return "implement";
+    }
+
+    private String leave() {
+        continueLoop = false;
+        return "Leaving Game...";
     }
 
     private String highlight(String[] params) {
@@ -61,7 +78,7 @@ public class InGameState extends State implements ServerMessageHandler {
         return """
                 redraw - create a new game
                 leave - leave the game
-                move <LetterNumber> <LetterNumber> - make a move
+                move <StartLetterNumber> <EndLetterNumber> - make a move
                 resign - surrender
                 highlight <LetterNumber> - highlight piece at this position
                 help - list possible commands
@@ -150,12 +167,16 @@ public class InGameState extends State implements ServerMessageHandler {
             if ((x+y)%2==0) { returnString.append(SET_BG_COLOR_WHITE); blackSquare = false;}
             else { returnString.append(SET_BG_COLOR_BLACK); blackSquare = true;}
 
-            ChessPosition currentCell = new ChessPosition(y, 9-x);
-            ChessPiece piece = game.getPiece(y, 9-x);
+            int boardY = y;
+            int boardX = 9 - x;
+
             if (invert) {
-                piece = game.getPiece(9-y, x);
-                currentCell = new ChessPosition(y, 9-x);
+                boardY = 9 - y;
+                boardX = x;
             }
+
+            ChessPosition currentCell = new ChessPosition(boardY, boardX);
+            ChessPiece piece = game.getPiece(boardY, boardX);
 
             if (positions != null) {
                 if (positions.contains(currentCell)) { // if the piece can move to this position
@@ -163,7 +184,7 @@ public class InGameState extends State implements ServerMessageHandler {
                     else { returnString.append(SET_BG_COLOR_GREEN); }
                 }
             }
-            if (position != null) {
+            if (position != null && position.equals(currentCell)) {
                 returnString.append(SET_BG_COLOR_YELLOW);
             }
 
