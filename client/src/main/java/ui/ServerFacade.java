@@ -23,6 +23,10 @@ public class ServerFacade {
         authToken = null;
     }
 
+    public String getServerURL() {
+        return String.format(Locale.getDefault(), "http://%s:%d", serverURL, port);
+    }
+
     public void updateAuthToken(String auth) { authToken = auth; }
 
     public void clearAuthToken() { authToken = null; }
