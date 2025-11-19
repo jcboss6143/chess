@@ -85,7 +85,8 @@ public class PostLoginState extends State {
         GameData requestedGame;
         try { requestedGame = getCachedGameData(params[0]); }
         catch (BadResponseExeption e) { return SET_TEXT_COLOR_YELLOW + e.getMessage(); }
-        InGameState gameState = new InGameState(displayName, authToken, requestHandler, requestedGame, Objects.equals(displayName, requestedGame.blackUsername()));
+        InGameState gameState = new InGameState(displayName, authToken, requestHandler,
+                requestedGame, Objects.equals(displayName, requestedGame.blackUsername()));
         gameState.mainLoop();
         return "Exited Successfully";
     }
@@ -136,60 +137,5 @@ public class PostLoginState extends State {
         }
         return returnString.toString();
     }
-
-
-//    private String showBoard(ChessGame game, boolean invert) {
-//        invert = !invert; // accidentally built it inverted, so I had to invert the invert lol
-//        StringBuilder returnString = new StringBuilder();
-//        char[] letters = new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
-//        char[] numbers = new char[]{'1', '2', '3', '4', '5', '6', '7', '8'};
-//        if (invert) {
-//            letters = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-//            numbers = new char[]{'8', '7', '6', '5', '4', '3', '2', '1'};
-//        }
-//        for (int y = 0; y < 10; y++) {
-//            for (int x = 0; x < 10; x++) {
-//                updateBoardCell(x, y, returnString, invert, letters, numbers, game);
-//            }
-//            returnString.append("\n");
-//        }
-//        returnString.append(RESET_BG_COLOR);
-//        return returnString.toString();
-//    }
-//
-//
-//    private void updateBoardCell(int x, int y, StringBuilder returnString, boolean invert, char[] letters, char[] numbers, ChessGame game) {
-//        if (y == 0 || x == 0 || y == 9 || x == 9) {
-//            returnString.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE);
-//            if ((y == 0 || y == 9) && (x != 0 && x != 9)) { returnString.append(" \u2009"+letters[x-1]+"\u2009 "); }
-//            else if ((x == 0 || x == 9) && (y != 0 && y != 9)) { returnString.append(" \u2009"+numbers[y-1]+"\u2009 "); }
-//            else { returnString.append(EMPTY); }
-//            returnString.append(RESET_BG_COLOR);
-//        }
-//        else {
-//            returnString.append(SET_TEXT_BOLD);
-//            if ((x+y)%2==0) { returnString.append(SET_BG_COLOR_WHITE); }
-//            else { returnString.append(SET_BG_COLOR_BLACK); }
-//            ChessPiece piece = game.getPiece(y, 9-x);
-//            if (invert) { piece = game.getPiece(9-y, x); }
-//            if (piece != null) {
-//                ChessGame.TeamColor color = piece.getTeamColor();
-//                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) { returnString.append(SET_TEXT_COLOR_BLUE); }
-//                else { returnString.append(SET_TEXT_COLOR_RED); }
-//                ChessPiece.PieceType type = piece.getPieceType();
-//                switch (type) {
-//                    case BISHOP -> { returnString.append(BLACK_BISHOP); }
-//                    case ROOK -> { returnString.append(BLACK_ROOK); }
-//                    case QUEEN -> { returnString.append(BLACK_QUEEN); }
-//                    case KNIGHT -> { returnString.append(BLACK_KNIGHT); }
-//                    case KING -> { returnString.append(BLACK_KING); }
-//                    case PAWN -> { returnString.append(BLACK_PAWN); }
-//                    case null, default -> { returnString.append(EMPTY); }
-//                }
-//            }
-//            else { returnString.append(EMPTY); }
-//            returnString.append(RESET_TEXT_BOLD_FAINT);
-//        }
-//    }
 
 }

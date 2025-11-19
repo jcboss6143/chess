@@ -72,7 +72,8 @@ public class InGameState extends State implements ServerMessageHandler {
                         " 4 - queen \n" +
                         ">>> " + SET_TEXT_COLOR_LIGHT_GREY);
                 result = scanner.nextLine().trim();
-                if (result.equals("1") || result.equals("2") || result.equals("3") || result.equals("4")) { break; } // will use this to get the correct promotion piece
+                // will use this to get the correct promotion piece
+                if (result.equals("1") || result.equals("2") || result.equals("3") || result.equals("4")) { break; }
                 else { System.out.print("Invalid move. Try again"); }
             }
             ChessPiece.PieceType type = switch (result) {
@@ -195,7 +196,8 @@ public class InGameState extends State implements ServerMessageHandler {
     }
 
 
-    private void updateBoardCell(int x, int y, StringBuilder returnString, char[] letters, char[] numbers, Collection<ChessPosition> positions, ChessPosition position) {
+    private void updateBoardCell(int x, int y, StringBuilder returnString, char[] letters, char[] numbers,
+                                 Collection<ChessPosition> positions, ChessPosition position) {
         if (y == 0 || x == 0 || y == 9 || x == 9) {
             returnString.append(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_WHITE);
             if ((y == 0 || y == 9) && (x != 0 && x != 9)) { returnString.append(" \u2009"+letters[x-1]+"\u2009 "); }

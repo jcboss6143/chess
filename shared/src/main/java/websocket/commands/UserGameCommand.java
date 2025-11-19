@@ -47,7 +47,7 @@ public class UserGameCommand {
 
     public ChessMove getMove() { return move; }
 
-    public void setMove(ChessMove new_move) { move = new_move; }
+    public void setMove(ChessMove newMove) { move = newMove; }
 
     @Override
     public boolean equals(Object o) {

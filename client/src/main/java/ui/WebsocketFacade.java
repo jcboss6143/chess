@@ -10,7 +10,6 @@ import websocket.messages.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 public class WebsocketFacade extends Endpoint {
     Session session;
@@ -35,14 +34,14 @@ public class WebsocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage new_message = new Gson().fromJson(message, ServerMessage.class);
-                    if (new_message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+                    ServerMessage newMessage = new Gson().fromJson(message, ServerMessage.class);
+                    if (newMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
                         NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
                         serverMessageHandler.notifyNotification(notification);
-                    } else if (new_message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+                    } else if (newMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
                         ErrorMessage notification = new Gson().fromJson(message, ErrorMessage.class);
                         serverMessageHandler.notifyError(notification);
-                    } else if (new_message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+                    } else if (newMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
                         LoadGameMessage notification = new Gson().fromJson(message, LoadGameMessage.class);
                         serverMessageHandler.notifyLoadGame(notification);
                     } else {
