@@ -13,6 +13,7 @@ import chess.ChessPiece;
 import com.google.gson.Gson;
 import model.CreateGameResult;
 import model.*;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -26,15 +27,15 @@ public class InGameState extends State implements ServerMessageHandler {
     boolean invert;
     private final WebsocketFacade ws;
 
-    public InGameState(String userName, String token, ServerFacade serverFacade, ChessGame game, boolean invert) {
+    public InGameState(String userName, String token, ServerFacade serverFacade, GameData gameInfo, boolean invert) {
         super(serverFacade);
         displayName = userName;
         serverFacade.updateAuthToken(token);
-        this.game = game;
+        this.game = gameInfo.game();
         this.invert = !invert; // accidentally built it inverted, so I had to invert the invert lol
-        ws = new WebsocketFacade(serverFacade.getServerURL(), this);
-
-        System.out.print(showBoard(null));
+        ws = new WebsocketFacade(serverFacade.getServerURL(), this, token, gameInfo.gameID());
+        ws.sendCommand(UserGameCommand.CommandType.CONNECT, null);
+        //System.out.print(showBoard(null));
     }
 
     @Override
@@ -85,16 +86,18 @@ public class InGameState extends State implements ServerMessageHandler {
             newMove = new ChessMove(startPosition, endPosition, type);
         }
 
-        // send newMove to server!
-        return "implement";
+        ws.sendCommand(UserGameCommand.CommandType.MAKE_MOVE, newMove);
+        return "";
     }
 
     private String resign() {
-        return "implement";
+        ws.sendCommand(UserGameCommand.CommandType.RESIGN, null);
+        return "";
     }
 
     private String leave() {
         continueLoop = false;
+        ws.sendCommand(UserGameCommand.CommandType.LEAVE, null);
         return "Leaving Game...";
     }
 
@@ -239,22 +242,22 @@ public class InGameState extends State implements ServerMessageHandler {
         }
     }
 
+
     @Override
     public void notifyLoadGame(LoadGameMessage message) {
         game = message.getGameData().game();
-        showBoard(null);
-        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
+        System.out.print(showBoard(null));
     }
+
 
     @Override
     public void notifyNotification(NotificationMessage message) {
-        System.out.print(message.getMessage());
-        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
+        System.out.print("\n" + message.getMessage());
     }
+
 
     @Override
     public void notifyError(ErrorMessage message) {
-        System.out.print(SET_TEXT_COLOR_RED + "ERROR: " + message.getMessage());
-        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
+        System.out.print("\n" + SET_TEXT_COLOR_RED + "ERROR: " + message.getMessage());
     }
 }

@@ -68,7 +68,7 @@ public class PostLoginState extends State {
                 catch (BadResponseExeption e) { return SET_TEXT_COLOR_YELLOW + e.getMessage(); }
                 JoinGameRequest requestObject = new JoinGameRequest(params[1], requestedGame.gameID());
                 String result = requestHandler.makeRequest("PUT", "/game", requestObject);
-                InGameState gameState = new InGameState(displayName, authToken, requestHandler, requestedGame.game(), Objects.equals(params[1], "BLACK"));
+                InGameState gameState = new InGameState(displayName, authToken, requestHandler, requestedGame, Objects.equals(params[1], "BLACK"));
                 gameState.mainLoop();
                 return "Exited Successfully";
             } catch (BadResponseExeption e) {
@@ -85,8 +85,7 @@ public class PostLoginState extends State {
         GameData requestedGame;
         try { requestedGame = getCachedGameData(params[0]); }
         catch (BadResponseExeption e) { return SET_TEXT_COLOR_YELLOW + e.getMessage(); }
-        ChessGame game = requestedGame.game();
-        InGameState gameState = new InGameState(displayName, authToken, requestHandler, game, Objects.equals(displayName, requestedGame.blackUsername()));
+        InGameState gameState = new InGameState(displayName, authToken, requestHandler, requestedGame, Objects.equals(displayName, requestedGame.blackUsername()));
         gameState.mainLoop();
         return "Exited Successfully";
     }
