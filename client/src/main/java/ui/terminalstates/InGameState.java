@@ -29,13 +29,12 @@ public class InGameState extends State implements ServerMessageHandler {
 
     public InGameState(String userName, String token, ServerFacade serverFacade, GameData gameInfo, boolean invert) {
         super(serverFacade);
-        displayName = userName;
+        displayName = gameInfo.gameName() + " >> " + userName;
         serverFacade.updateAuthToken(token);
         this.game = gameInfo.game();
         this.invert = !invert; // accidentally built it inverted, so I had to invert the invert lol
         ws = new WebsocketFacade(serverFacade.getServerURL(), this, token, gameInfo.gameID());
         ws.sendCommand(UserGameCommand.CommandType.CONNECT, null);
-        //System.out.print(showBoard(null));
     }
 
     @Override
@@ -62,7 +61,7 @@ public class InGameState extends State implements ServerMessageHandler {
         ChessMove newMove = new ChessMove(startPosition, endPosition, null);
 
         // pawn promotion
-        if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN && endPosition.getRow() == 8) {
+        if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN && (endPosition.getRow() == 8 || endPosition.getRow() == 1)) {
             Scanner scanner = new Scanner(System.in);
             String result;
             while (true) {
@@ -246,18 +245,21 @@ public class InGameState extends State implements ServerMessageHandler {
     @Override
     public void notifyLoadGame(LoadGameMessage message) {
         game = message.getGameData().game();
-        System.out.print(showBoard(null));
+        System.out.print("\n" + showBoard(null));
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
     }
 
 
     @Override
     public void notifyNotification(NotificationMessage message) {
         System.out.print("\n" + message.getMessage());
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
     }
 
 
     @Override
     public void notifyError(ErrorMessage message) {
-        System.out.print("\n" + SET_TEXT_COLOR_RED + "ERROR: " + message.getMessage());
+        System.out.print("\n" + SET_TEXT_COLOR_YELLOW + message.getMessage());
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
     }
 }

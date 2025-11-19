@@ -87,9 +87,14 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMoveCommand(String authToken, Integer gameID, Session session, ChessMove move) throws DataAccessException, IOException {
+
         AuthData authInfo = userService.getUserInfoFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
         if (validateRequest(authInfo, gameInfo, gameID, session)) { return; }
+        if (gameInfo.game().isGameFinished()) {
+            broadcastError(gameID, session, "Error: Game Is Finished");
+            return;
+        }
 
         String username = authInfo.username();
 
@@ -163,6 +168,10 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         AuthData authInfo = userService.getUserInfoFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
         if (validateRequest(authInfo, gameInfo, gameID, session)) { return; }
+        if (gameInfo.game().isGameFinished()) {
+            broadcastError(gameID, session, "Error: Game Is Finished");
+            return;
+        }
 
         String username = authInfo.username();
 
@@ -192,10 +201,6 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private boolean validateRequest(AuthData authInfo, GameData gameInfo, Integer gameID, Session session) throws IOException {
         if (gameInfo == null || authInfo == null) {
             broadcastError(gameID, session, "Error: Invalid request");
-            return true;
-        }
-        if (gameInfo.game().isGameFinished()) {
-            broadcastError(gameID, session, "Error: Game Is Finished");
             return true;
         }
         return false;
