@@ -90,7 +90,18 @@ public class InGameState extends State implements ServerMessageHandler {
     }
 
     private String resign() {
-        ws.sendCommand(UserGameCommand.CommandType.RESIGN, null);
+        Scanner scanner = new Scanner(System.in);
+        String result;
+        while (true) {
+            System.out.print("\n" + SET_TEXT_COLOR_WHITE + "Are you sure you want to resign? \n" +
+                    " 1 - yes \n" +
+                    " 2 - no \n" +
+                    ">>> " + SET_TEXT_COLOR_LIGHT_GREY);
+            result = scanner.nextLine().trim();
+            if (result.equals("1") || result.equals("2")) { break; } // will use this to get the correct promotion piece
+            else { System.out.print("Please select 1 or 2"); }
+        }
+        if (result.equals("1")) { ws.sendCommand(UserGameCommand.CommandType.RESIGN, null); }
         return "";
     }
 

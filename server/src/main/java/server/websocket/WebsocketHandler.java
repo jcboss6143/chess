@@ -14,6 +14,7 @@ import io.javalin.websocket.WsMessageHandler;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.jetbrains.annotations.NotNull;
 import service.CommonServices;
 import service.GameService;
 import service.UserService;
@@ -21,10 +22,8 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Objects;
 
 
@@ -64,7 +63,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
 
     @Override
-    public void handleClose(WsCloseContext ctx) {
+    public void handleClose(@NotNull WsCloseContext ctx) {
         System.out.println("Websocket closed");
     }
 
@@ -126,14 +125,13 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
+        // setup so we can broadcast the move that was made
         String playerColor;
         if (isBlack) { playerColor = "black"; }
         else { playerColor = "white"; }
-        // setup so we can broadcast the move that was made
-        String startPos = String.format("%c%d", 96+move.getStartPosition().getRow(), move.getStartPosition().getColumn());
-        String endPos = String.format("%c%d", 96+move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+        String startPos = String.format("%c%d", 96+move.getStartPosition().getColumn(), move.getStartPosition().getRow());
+        String endPos = String.format("%c%d", 96+move.getEndPosition().getColumn(), move.getEndPosition().getRow());
         String moveMessage = String.format("%s (%s) moved %s to %s ", username, playerColor, startPos, endPos);
-
 
         // setup so we can broadcast if the player is in check, checkmate, or stalemate
         boolean playerInTrubble = false;
