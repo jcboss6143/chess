@@ -35,6 +35,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final UserService userService;
     private final GameService gameService;
 
+
     public WebsocketHandler(CommonServices common, UserService user, GameService game){
         super();
         commonServices = common;
@@ -42,11 +43,13 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         gameService = game;
     }
 
+
     @Override
     public void handleConnect(WsConnectContext ctx) {
         System.out.println("Websocket connected");
         ctx.enableAutomaticPings();
     }
+
 
     @Override
     public void handleMessage(WsMessageContext ctx) throws DataAccessException, IOException {
@@ -59,10 +62,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
+
     @Override
     public void handleClose(WsCloseContext ctx) {
         System.out.println("Websocket closed");
     }
+
 
     private void connectCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         AuthData authInfo = userService.getUserInfoFromAuth(authToken);
@@ -86,8 +91,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(gameID, session, loadGame, false);
     }
 
-    private void makeMoveCommand(String authToken, Integer gameID, Session session, ChessMove move) throws DataAccessException, IOException {
 
+    private void makeMoveCommand(String authToken, Integer gameID, Session session, ChessMove move) throws DataAccessException, IOException {
         AuthData authInfo = userService.getUserInfoFromAuth(authToken);
         GameData gameInfo = gameService.getGame(gameID);
         if (validateRequest(authInfo, gameInfo, gameID, session)) { return; }
@@ -97,27 +102,23 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         String username = authInfo.username();
-
         ChessGame game = gameInfo.game();
         ChessGame.TeamColor teamTurn = game.getTeamTurn();
 
+        // testing if the move is valid or not
         if (!Objects.equals(gameInfo.blackUsername(), username) && !Objects.equals(gameInfo.whiteUsername(), username)) {
             broadcastError(gameID, session, "Error: Unauthorized");
             return;
         }
-
         boolean isBlack = Objects.equals(gameInfo.blackUsername(), username);
-
         if (teamTurn == ChessGame.TeamColor.WHITE && isBlack){
             broadcastError(gameID, session, "Error: Unauthorized");
             return;
         }
-
         if (teamTurn == ChessGame.TeamColor.BLACK && !isBlack){
             broadcastError(gameID, session, "Error: Unauthorized");
             return;
         }
-
         try {
             game.makeMove(move);
         } catch (InvalidMoveException e) {
@@ -125,22 +126,59 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
-        GameData updatedGame = new GameData(gameInfo.gameID(), gameInfo.whiteUsername(), gameInfo.blackUsername(), gameInfo.gameName(), game);
-        gameService.updateGame(updatedGame);
-
-        LoadGameMessage loadGame = new LoadGameMessage(updatedGame);
-        connections.broadcast(gameID, null, loadGame, false);
-
         String playerColor;
         if (isBlack) { playerColor = "black"; }
         else { playerColor = "white"; }
-        // broadcast the move made!
-        String startPos = move.getStartPosition().toString();
-        String endPos = move.getEndPosition().toString();
-        String message = String.format("%s (%s) moved %s to %s ", username, playerColor, startPos, endPos);
-        NotificationMessage notification = new NotificationMessage(message);
-        connections.broadcast(gameID, session, notification, true);
+        // setup so we can broadcast the move that was made
+        String startPos = String.format("%c%d", 96+move.getStartPosition().getRow(), move.getStartPosition().getColumn());
+        String endPos = String.format("%c%d", 96+move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+        String moveMessage = String.format("%s (%s) moved %s to %s ", username, playerColor, startPos, endPos);
+
+
+        // setup so we can broadcast if the player is in check, checkmate, or stalemate
+        boolean playerInTrubble = false;
+        String checkMessage = "";
+        if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+            checkMessage = String.format("%s (white) is in checkmate ", gameInfo.whiteUsername());
+            playerInTrubble = true;
+        }
+        else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+            checkMessage = String.format("%s (black) is in checkmate ", gameInfo.blackUsername());
+            playerInTrubble = true;
+        }
+        else if (game.isInStalemate(ChessGame.TeamColor.WHITE)) {
+            checkMessage = String.format("%s (white) is in stalemate ", gameInfo.whiteUsername());
+            playerInTrubble = true;
+        }
+        else if (game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            checkMessage = String.format("%s (black) is in stalemate ", gameInfo.blackUsername());
+            playerInTrubble = true;
+        }
+        else if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+            checkMessage = String.format("%s (white) is in check ", gameInfo.whiteUsername());
+            playerInTrubble = true;
+        }
+        else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
+            checkMessage = String.format("%s (black) is in check ", gameInfo.blackUsername());
+            playerInTrubble = true;
+        }
+
+        // updating game and broadcasting our messages
+        GameData updatedGame = new GameData(gameInfo.gameID(), gameInfo.whiteUsername(), gameInfo.blackUsername(), gameInfo.gameName(), game);
+        gameService.updateGame(updatedGame);
+        LoadGameMessage loadGame = new LoadGameMessage(updatedGame);
+        connections.broadcast(gameID, null, loadGame, false); // load game message
+
+        if (playerInTrubble) {  // check message
+            NotificationMessage checkNotification = new NotificationMessage(moveMessage + "\n" + checkMessage);
+            connections.broadcast(gameID, session, checkNotification, true);
+        }
+        else {
+            NotificationMessage moveNotification = new NotificationMessage(moveMessage);
+            connections.broadcast(gameID, session, moveNotification, true); // move message
+        }
     }
+
 
     private void leaveCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         AuthData authInfo = userService.getUserInfoFromAuth(authToken);
@@ -163,6 +201,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(gameID, session, notification, true);
         connections.remove(gameID, session);
     }
+
 
     private void resignCommand(String authToken, Integer gameID, Session session) throws DataAccessException, IOException {
         AuthData authInfo = userService.getUserInfoFromAuth(authToken);
