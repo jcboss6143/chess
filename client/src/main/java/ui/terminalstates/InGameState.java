@@ -55,6 +55,37 @@ public class InGameState extends State implements ServerMessageHandler {
         ChessPosition startPosition = translateLetterNumber(params[0]);
         ChessPosition endPosition = translateLetterNumber(params[1]);
         if (startPosition == null || endPosition == null) {  return SET_TEXT_COLOR_YELLOW + "InvalidPosition. Please try again"; }
+
+        ChessPiece movingPiece = game.getPiece(startPosition.getRow(), startPosition.getColumn());
+        if (movingPiece == null) { return SET_TEXT_COLOR_YELLOW + "No piece at that location. Please try again"; }
+        ChessMove newMove = new ChessMove(startPosition, endPosition, null);
+
+        // pawn promotion
+        if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN && endPosition.getRow() == 8) {
+            Scanner scanner = new Scanner(System.in);
+            String result;
+            while (true) {
+                System.out.print("\n" + SET_TEXT_COLOR_WHITE + "What piece do you want to promote your pawn to? \n" +
+                        " 1 - rook \n" +
+                        " 2 - bishop \n" +
+                        " 3 - knight \n" +
+                        " 4 - queen \n" +
+                        ">>> " + SET_TEXT_COLOR_LIGHT_GREY);
+                result = scanner.nextLine().trim();
+                if (result.equals("1") || result.equals("2") || result.equals("3") || result.equals("4")) { break; } // will use this to get the correct promotion piece
+                else { System.out.print("Invalid move. Try again"); }
+            }
+            ChessPiece.PieceType type = switch (result) {
+                case "1" -> ChessPiece.PieceType.ROOK;
+                case "2" -> ChessPiece.PieceType.BISHOP;
+                case "3" -> ChessPiece.PieceType.KNIGHT;
+                case "4" -> ChessPiece.PieceType.QUEEN;
+                default -> null;
+            };
+            newMove = new ChessMove(startPosition, endPosition, type);
+        }
+
+        // send newMove to server!
         return "implement";
     }
 
@@ -169,7 +200,6 @@ public class InGameState extends State implements ServerMessageHandler {
 
             int boardY = y;
             int boardX = 9 - x;
-
             if (invert) {
                 boardY = 9 - y;
                 boardX = x;
@@ -211,16 +241,20 @@ public class InGameState extends State implements ServerMessageHandler {
 
     @Override
     public void notifyLoadGame(LoadGameMessage message) {
-
+        game = message.getGameData().game();
+        showBoard(null);
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
     }
 
     @Override
     public void notifyNotification(NotificationMessage message) {
-
+        System.out.print(message.getMessage());
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
     }
 
     @Override
     public void notifyError(ErrorMessage message) {
-
+        System.out.print(SET_TEXT_COLOR_RED + "ERROR: " + message.getMessage());
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + displayName + " >>> " + SET_TEXT_COLOR_LIGHT_GREY);
     }
 }
