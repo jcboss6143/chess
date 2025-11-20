@@ -167,14 +167,14 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         LoadGameMessage loadGame = new LoadGameMessage(updatedGame);
         connections.broadcast(gameID, null, loadGame, false); // load game message
 
+        NotificationMessage moveNotification = new NotificationMessage(moveMessage);
+        connections.broadcast(gameID, session, moveNotification, true); // move message
+
         if (playerInTrubble) {  // check message
-            NotificationMessage checkNotification = new NotificationMessage(moveMessage + "\n" + checkMessage);
-            connections.broadcast(gameID, session, checkNotification, true);
+            NotificationMessage checkNotification = new NotificationMessage(checkMessage);
+            connections.broadcast(gameID, null, checkNotification, false);
         }
-        else {
-            NotificationMessage moveNotification = new NotificationMessage(moveMessage);
-            connections.broadcast(gameID, session, moveNotification, true); // move message
-        }
+
     }
 
 
